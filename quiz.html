@@ -20,7 +20,8 @@
 <script>
 (function () {
   const leadId = RUApp.lead();
-  if (!leadId) { location.replace("/?next=quiz"); return; }
+  // Só manda para a captura quem nunca passou por ela neste aparelho.
+  if (!leadId && !RUApp.lerLocal("ru_nome")) { location.replace("/?next=quiz"); return; }
   document.getElementById("voltar-guia").href = RUApp.linkComLead("/guia");
 
   const Q = RU.QUESTOES;
@@ -68,7 +69,7 @@
     url.searchParams.set("r", codigo);
     if (clinica) url.searchParams.set("n", clinica);
 
-    const envio = fetch("/api/quiz", {
+    const envio = !leadId ? Promise.resolve() : fetch("/api/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -80,7 +81,7 @@
       }),
     }).catch(() => {});
     await Promise.all([envio, new Promise((ok) => setTimeout(ok, 2000))]);
-    url.searchParams.set("l", leadId);
+    if (leadId) url.searchParams.set("l", leadId);
     location.href = url.pathname + url.search;
   }
 
