@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanto sua clínica deixa de faturar depois que o lead chega? | RiseUp Odonto</title>
+<meta name="description" content="Responda 8 perguntas e veja em qual etapa a sua clínica perde pacientes, com a estimativa em reais.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<header class="topo"><div class="wrap-largo"><a class="logo" href="/"><span class="marca" aria-hidden="true"></span><strong>RiseUp Odonto</strong></a></div></header>
+
+<div class="wrap-largo">
+  <div class="captura">
+    <div class="banner" aria-hidden="true">
+      <span class="circ" style="width:280px;height:280px;left:-70px;bottom:-110px"></span>
+      <span class="circ" style="width:170px;height:170px;left:-15px;bottom:-55px"></span>
+      <span class="circ" style="width:220px;height:220px;right:-90px;top:-90px"></span>
+      <div class="capa"><small>Guia</small><b>Depois que o lead chega</b></div>
+      <div class="cel">
+        <div class="l1">Mini diagnóstico</div>
+        <div class="l2">Etapa mais fraca</div>
+        <div class="l3">Fechamento</div>
+        <div class="valor">R$ por mês</div>
+        <div class="b" style="width:100%"></div>
+        <div class="b" style="width:62%"></div>
+        <div class="b" style="width:40%"></div>
+        <div class="b" style="width:18%;background:#141414"></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="sobre">Diagnóstico gratuito para donos de clínica</div>
+      <h1>Quanto a sua clínica deixa de faturar <span class="destaque">depois que o lead chega</span>?</h1>
+      <p class="muted">Responda 8 perguntas e veja em qual etapa os pacientes se perdem, com a estimativa em reais.</p>
+      <div class="receber">
+        <strong>O que você recebe</strong>
+        <span>1. Mini diagnóstico com a etapa mais fraca e a estimativa mensal</span>
+        <span>2. Guia das 6 etapas, do primeiro contato ao fechamento</span>
+        <span>3. Scripts prontos para a recepção usar</span>
+      </div>
+
+      <form id="form" class="stack" novalidate>
+        <div class="campo"><label for="nome">Seu nome</label><input id="nome" name="nome" autocomplete="name" placeholder="Como podemos te chamar" maxlength="80" required></div>
+        <div class="campo"><label for="clinica">Nome da clínica</label><input id="clinica" name="clinica" autocomplete="organization" placeholder="Nome da sua clínica" maxlength="120" required></div>
+        <div class="campo"><label for="whatsapp">WhatsApp</label><input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" maxlength="20" required></div>
+        <div class="campo"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" placeholder="seu@email.com" maxlength="120" required></div>
+        <div class="campo"><label for="faixa">Faturamento mensal da clínica</label>
+          <select id="faixa" name="faixa" required>
+            <option value="">Selecione uma faixa</option>
+            <option>Até R$ 70 mil</option>
+            <option>R$ 70 a 150 mil</option>
+            <option>Acima de R$ 150 mil</option>
+          </select>
+        </div>
+        <label class="consentimento"><input type="checkbox" id="lgpd" required><span>Concordo em receber o material e contatos da RiseUp Odonto por WhatsApp e e-mail. Meus dados são usados só para isso, conforme a LGPD.</span></label>
+        <p class="erro" id="erro" role="alert"></p>
+        <button class="btn btn-full" type="submit" id="enviar">Calcular o vazamento da minha clínica</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="rodape"><div class="wrap-largo">RiseUp Odonto · sistema de captação, conversão e retenção</div></footer>
+
+<script src="/assets/app.js"></script>
+<script>
+(function () {
+  const p = RUApp.params;
+  const form = document.getElementById("form");
+  const erro = document.getElementById("erro");
+  const botao = document.getElementById("enviar");
+  const zap = document.getElementById("whatsapp");
+
+  zap.addEventListener("input", () => {
+    let d = zap.value.replace(/\D/g, "").slice(0, 11);
+    if (d.length > 6) zap.value = `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}`;
+    else if (d.length > 2) zap.value = `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    else zap.value = d;
+  });
+
+  function origem() {
+    if (p.get("c")) return "Prospecção";
+    if ((p.get("o") || "").toLowerCase() === "anuncio") return "Anúncio";
+    return "Instagram";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    erro.textContent = "";
+    const dados = {
+      nome: form.nome.value.trim(),
+      clinica: form.clinica.value.trim(),
+      whatsapp: zap.value.replace(/\D/g, ""),
+      email: form.email.value.trim(),
+      faixa: form.faixa.value,
+      consentimento: document.getElementById("lgpd").checked,
+      codigo: p.get("c") || "",
+      origem: origem(),
+    };
+    if (!dados.nome || !dados.clinica) return (erro.textContent = "Preencha seu nome e o nome da clínica.");
+    if (dados.whatsapp.length < 10) return (erro.textContent = "Confira o WhatsApp, com DDD.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email)) return (erro.textContent = "Confira o e-mail.");
+    if (!dados.faixa) return (erro.textContent = "Selecione a faixa de faturamento.");
+    if (!dados.consentimento) return (erro.textContent = "Marque a caixa de consentimento para continuar.");
+
+    botao.disabled = true;
+    botao.textContent = "Enviando...";
+    let leadId = "";
+    for (let tentativa = 0; tentativa < 2 && !leadId; tentativa++) {
+      try {
+        const r = await fetch("/api/captura", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
+        if (r.ok) leadId = (await r.json()).lead || "";
+      } catch (err) {}
+    }
+    RUApp.gravarLocal("ru_nome", dados.nome);
+    RUApp.gravarLocal("ru_clinica", dados.clinica);
+    if (leadId) RUApp.gravarLocal("ru_lead", leadId);
+    const destino = p.get("next") === "quiz" ? "/quiz" : "/guia";
+    location.href = destino + (leadId ? "?l=" + encodeURIComponent(leadId) : "");
+  });
+})();
+</script>
+</body>
+</html>

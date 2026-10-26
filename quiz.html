@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnóstico do vazamento | RiseUp Odonto</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="quiz">
+<header class="topo"><div class="wrap"><a class="logo" href="/guia" id="voltar-guia"><span class="marca" aria-hidden="true"></span><strong>RiseUp Odonto</strong></a></div></header>
+
+<main class="wrap" id="tela"></main>
+
+<script src="/assets/calc.js"></script>
+<script src="/assets/app.js"></script>
+<script>
+(function () {
+  const leadId = RUApp.lead();
+  if (!leadId) { location.replace("/?next=quiz"); return; }
+  document.getElementById("voltar-guia").href = RUApp.linkComLead("/guia");
+
+  const Q = RU.QUESTOES;
+  const respostas = new Array(Q.length).fill(null);
+  let passo = 0;
+  const tela = document.getElementById("tela");
+
+  function esc(t) { return t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]); }
+
+  function render() {
+    const q = Q[passo];
+    const pct = Math.round(((passo + 1) / Q.length) * 100);
+    tela.innerHTML = `
+      <div class="stack fade" style="gap:8px">
+        <div style="display:flex;justify-content:space-between" class="small muted"><span>Pergunta ${passo + 1} de ${Q.length}</span><span>Cerca de 2 minutos</span></div>
+        <div class="barra" style="height:6px"><i style="width:${pct}%"></i></div>
+      </div>
+      <div class="sobre fade">${esc(q.etapa)}</div>
+      <h1 class="fade" style="font-size:clamp(22px,4.4vw,30px)">${esc(q.p)}</h1>
+      <p class="muted small fade">Responda de cabeça. Não precisa ser exato.</p>
+      <div class="opcoes fade">${q.o.map((o, i) => `<button type="button" class="opcao${respostas[passo] === i ? " sel" : ""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+      <div class="quiz-nav"><button type="button" class="btn btn-outline" id="voltar" ${passo === 0 ? "disabled" : ""}>Voltar</button></div>`;
+    tela.querySelectorAll(".opcao").forEach((b) => b.addEventListener("click", () => escolher(Number(b.dataset.i))));
+    document.getElementById("voltar").addEventListener("click", () => { if (passo > 0) { passo--; render(); } });
+    window.scrollTo(0, 0);
+  }
+
+  function escolher(i) {
+    respostas[passo] = i;
+    if (passo < Q.length - 1) { passo++; render(); }
+    else finalizar();
+  }
+
+  async function finalizar() {
+    tela.innerHTML = `
+      <div class="stack fade" style="flex:1;align-items:center;justify-content:center;text-align:center;gap:22px">
+        <div class="spinner" aria-hidden="true"></div>
+        <h1 style="font-size:clamp(22px,4.4vw,30px)">Calculando o vazamento da sua clínica</h1>
+        <p class="muted">Cruzando suas respostas com as 6 etapas.</p>
+      </div>`;
+    const r = RU.calcular(respostas);
+    const codigo = respostas.join("");
+    const clinica = RUApp.lerLocal("ru_clinica") || "";
+    const url = new URL("/resultado", location.origin);
+    url.searchParams.set("r", codigo);
+    if (clinica) url.searchParams.set("n", clinica);
+
+    const envio = fetch("/api/quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lead: leadId,
+        etapa: r.notionEtapa,
+        estimativa: r.estimativa !== null ? Math.round(r.estimativa) : null,
+        respostas: RU.respostasTexto(respostas),
+        resultado: url.toString(),
+      }),
+    }).catch(() => {});
+    await Promise.all([envio, new Promise((ok) => setTimeout(ok, 2000))]);
+    url.searchParams.set("l", leadId);
+    location.href = url.pathname + url.search;
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

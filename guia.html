@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depois que o lead chega | RiseUp Odonto</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<div class="progresso no-print">
+  <div class="wrap">
+    <div class="linha"><a class="logo" href="#topo"><span class="marca" aria-hidden="true"></span><strong>RiseUp Odonto</strong></a><span class="small muted" id="etapa-atual">Guia</span></div>
+    <div class="barra"><i id="barra"></i></div>
+  </div>
+</div>
+
+<main id="topo">
+  <section class="secao">
+    <div class="wrap stack">
+      <div class="sobre" id="saudacao">Seu guia está pronto</div>
+      <h1>Depois que o <span class="destaque">lead chega</span></h1>
+      <p class="muted">As 6 etapas entre o primeiro contato e o fechamento, e o que fazer em cada uma.</p>
+      <a class="btn btn-full quiz-link" href="/quiz">Fazer o diagnóstico em 2 minutos</a>
+      <a href="#problema" class="small" style="text-align:center">Ou ler o guia primeiro</a>
+    </div>
+  </section>
+
+  <section class="secao cinza" id="problema">
+    <div class="wrap stack">
+      <div class="sobre">O problema</div>
+      <h2>O contato chega. O paciente, nem sempre.</h2>
+      <p class="muted">A clínica investe em anúncio, o contato chega no WhatsApp e a conta parece simples. Mas entre a primeira mensagem e o tratamento fechado existem seis etapas, e em cada uma parte dos pacientes fica pelo caminho. Em muitas clínicas, o problema não está na quantidade de contatos, e sim no que acontece depois.</p>
+      <div class="card reveal">
+        <h3>Para onde vão 100 contatos</h3>
+        <div class="funil" style="margin-top:10px">
+          <div class="row"><div class="rot"><span>Contatos</span><span>100</span></div><div class="trilho"><i style="--w:100%"></i></div></div>
+          <div class="row"><div class="rot"><span>Agendam</span><span>40</span></div><div class="trilho"><i style="--w:40%;transition-delay:.3s"></i></div></div>
+          <div class="row"><div class="rot"><span>Comparecem</span><span>28</span></div><div class="trilho"><i style="--w:28%;transition-delay:.6s"></i></div></div>
+          <div class="row"><div class="rot"><span>Fecham</span><span>8</span></div><div class="trilho"><i class="fraco" style="--w:8%;transition-delay:.9s"></i></div></div>
+        </div>
+        <p class="small muted" style="margin-top:10px">Números ilustrativos.</p>
+      </div>
+      <a class="btn btn-full quiz-link" href="/quiz">Descobrir minha etapa mais fraca</a>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="wrap stack">
+      <div class="sobre">Mapa das 6 etapas</div>
+      <h2>Vá direto à etapa que mais dói</h2>
+      <nav class="mapa" id="mapa">
+        <a href="#etapa1"><span class="n">1</span>Primeira resposta</a>
+        <a href="#etapa2"><span class="n">2</span>Agendamento</a>
+        <a href="#etapa3"><span class="n">3</span>Comparecimento</a>
+        <a href="#etapa4"><span class="n">4</span>Orçamento</a>
+        <a href="#etapa5"><span class="n">5</span>Fechamento</a>
+        <a href="#etapa6"><span class="n">6</span>Retorno</a>
+        <a href="#etapa1" class="naosei">Ainda não sei qual é a minha</a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="secao cinza etapa" id="etapa1" data-n="1" data-nome="Primeira resposta">
+    <div class="wrap stack">
+      <div class="sobre">Etapa 1 de 6</div>
+      <h2>Primeira resposta</h2>
+      <div class="card"><h3>Sinal de que vaza aqui</h3><p class="muted">O contato da noite ou do fim de semana só é respondido no dia seguinte.</p></div>
+      <div class="card"><h3>Erro comum</h3><p class="muted">Responder tarde, com mensagem genérica ou já com o preço.</p></div>
+      <div class="card reveal"><h3>Como costuma acontecer</h3>
+        <div class="chat">
+          <div class="bolha paciente">Oi, queria saber sobre o tratamento <span class="hora">21:40</span></div>
+          <div class="bolha clinica">Bom dia! Segue nossa tabela. <span class="hora">10:15, dia seguinte</span></div>
+          <div class="status">Visualizado. Sem resposta.</div>
+        </div>
+      </div>
+      <div class="card"><h3>O que fazer</h3><ol class="passos"><li>Definir quem responde e em quanto tempo, inclusive fora do horário.</li><li>Abrir com o nome e uma pergunta sobre o caso, não com a tabela.</li><li>Terminar toda mensagem com uma pergunta.</li></ol></div>
+      <div class="ferramenta"><h3>Script de primeira mensagem</h3>
+        <div class="script"><p>Olá, [nome]! Aqui é a [atendente], da [clínica]. Vi que você se interessou por [procedimento]. Para eu te orientar melhor: é a primeira vez que você busca esse tratamento ou já fez alguma avaliação?</p><button type="button" class="copy">Copiar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao etapa" id="etapa2" data-n="2" data-nome="Agendamento">
+    <div class="wrap stack">
+      <div class="sobre">Etapa 2 de 6</div>
+      <h2>Agendamento</h2>
+      <div class="card"><h3>Sinal de que vaza aqui</h3><p class="muted">Muita conversa e pouca avaliação marcada.</p></div>
+      <div class="card"><h3>Erro comum</h3><p class="muted">Passar o valor seco pelo WhatsApp.</p></div>
+      <div class="card reveal"><h3>Como costuma acontecer</h3>
+        <div class="chat">
+          <div class="bolha paciente">Quanto custa?</div>
+          <div class="bolha clinica">A partir de R$ [valor].</div>
+          <div class="status">Visualizado. Sem resposta.</div>
+        </div>
+      </div>
+      <div class="card"><h3>O que fazer</h3><ol class="passos"><li>Reconhecer a pergunta, sem fugir dela.</li><li>Explicar que o valor depende da avaliação.</li><li>Oferecer dois horários concretos.</li></ol></div>
+      <div class="ferramenta"><h3>Script do "quanto custa?"</h3>
+        <div class="script"><p>Faz sentido querer saber o valor, [nome]. Ele depende do seu caso, e é na avaliação que o(a) Dr(a). [nome] define o que você precisa. Tenho horário [dia] às [hora] ou [dia] às [hora]. Qual fica melhor?</p><button type="button" class="copy">Copiar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao cinza etapa" id="etapa3" data-n="3" data-nome="Comparecimento">
+    <div class="wrap stack">
+      <div class="sobre">Etapa 3 de 6</div>
+      <h2>Comparecimento</h2>
+      <div class="card"><h3>Sinal de que vaza aqui</h3><p class="muted">Buracos na agenda de avaliações, sem aviso do paciente.</p></div>
+      <div class="card"><h3>Erro comum</h3><p class="muted">Confirmar só na véspera, ou não confirmar.</p></div>
+      <div class="card reveal"><h3>Como costuma acontecer</h3>
+        <div class="chat">
+          <div class="bolha clinica">Lembrando da sua consulta amanhã às 14h.</div>
+          <div class="status" style="transition-delay:.5s">Sem resposta. Paciente não aparece.</div>
+        </div>
+      </div>
+      <div class="card"><h3>O que fazer</h3><ol class="passos"><li>Confirmar no ato do agendamento com data, hora e endereço.</li><li>Lembrar na véspera e no dia, pedindo uma resposta.</li><li>Remarcar no mesmo dia quem faltou.</li></ol></div>
+      <div class="bloqueada"><h3>Mensagens de confirmação</h3><p class="muted">Liberadas no seu mini diagnóstico, se esta for a sua etapa mais fraca.</p><a class="btn btn-outline quiz-link" href="/quiz">Fazer o diagnóstico</a></div>
+    </div>
+  </section>
+
+  <section class="secao escuro">
+    <div class="wrap stack">
+      <h2>Qual dessas etapas mais pesa na <span class="destaque">sua clínica</span>?</h2>
+      <p style="color:#e3e9e9">8 perguntas, cerca de 2 minutos. O resultado aparece na hora.</p>
+      <a class="btn btn-full quiz-link" href="/quiz">Calcular o vazamento da minha clínica</a>
+    </div>
+  </section>
+
+  <section class="secao etapa" id="etapa4" data-n="4" data-nome="Orçamento">
+    <div class="wrap stack">
+      <div class="sobre">Etapa 4 de 6</div>
+      <h2>Orçamento</h2>
+      <div class="card"><h3>Sinal de que vaza aqui</h3><p class="muted">O paciente ouve o valor e passa a comparar só o preço.</p></div>
+      <div class="card"><h3>Erro comum</h3><p class="muted">Apresentar o preço antes de o paciente entender o que está comprando.</p></div>
+      <div class="card reveal"><h3>Como costuma acontecer, na avaliação</h3>
+        <div class="chat">
+          <div class="bolha clinica">O tratamento fica em R$ [valor].</div>
+          <div class="bolha paciente">Vou ver e te aviso.</div>
+        </div>
+      </div>
+      <div class="card"><h3>O que fazer</h3><ol class="passos"><li>Retomar o que incomoda o paciente, com as palavras dele.</li><li>Mostrar o plano e o resultado esperado.</li><li>Só então o valor, com formas de pagamento e próximo passo.</li></ol></div>
+      <div class="bloqueada"><h3>Roteiro "valor antes do preço"</h3><p class="muted">Liberado no seu mini diagnóstico, se esta for a sua etapa mais fraca.</p><a class="btn btn-outline quiz-link" href="/quiz">Fazer o diagnóstico</a></div>
+    </div>
+  </section>
+
+  <section class="secao cinza etapa" id="etapa5" data-n="5" data-nome="Fechamento">
+    <div class="wrap stack">
+      <div class="sobre">Etapa 5 de 6</div>
+      <h2>Fechamento</h2>
+      <div class="card"><h3>Sinal de que vaza aqui</h3><p class="muted">O "vou pensar" encerra a conversa.</p></div>
+      <div class="card"><h3>Erro comum</h3><p class="muted">Aceitar e esperar o paciente voltar sozinho.</p></div>
+      <div class="card reveal"><h3>Como costuma acontecer</h3>
+        <div class="chat">
+          <div class="bolha paciente">Vou pensar e te falo.</div>
+          <div class="bolha clinica">Tudo bem, fico no aguardo!</div>
+        </div>
+      </div>
+      <div class="card"><h3>O que fazer</h3><ol class="passos"><li>Perguntar o que falta para decidir.</li><li>Responder àquela dúvida específica.</li><li>Combinar a data do retorno antes de o paciente sair.</li></ol></div>
+      <div class="bloqueada"><h3>Script do "vou pensar"</h3><p class="muted">Liberado no seu mini diagnóstico, se esta for a sua etapa mais fraca.</p><a class="btn btn-outline quiz-link" href="/quiz">Fazer o diagnóstico</a></div>
+    </div>
+  </section>
+
+  <section class="secao etapa" id="etapa6" data-n="6" data-nome="Retorno">
+    <div class="wrap stack">
+      <div class="sobre">Etapa 6 de 6</div>
+      <h2>Retorno</h2>
+      <div class="card"><h3>Sinal de que vaza aqui</h3><p class="muted">Orçamentos apresentados sem resposta, e ninguém sabe quantos.</p></div>
+      <div class="card"><h3>Erro comum</h3><p class="muted">Uma tentativa de contato, ou nenhuma.</p></div>
+      <div class="card reveal"><h3>Como costuma acontecer</h3>
+        <div class="chat">
+          <div class="bolha clinica">Oi, e aí, decidiu? <span class="hora">15 dias depois</span></div>
+          <div class="status" style="transition-delay:.5s">Sem resposta.</div>
+        </div>
+      </div>
+      <div class="card"><h3>O que fazer</h3><ol class="passos"><li>Listar todo orçamento aberto, com data e valor.</li><li>Definir as datas de cada contato.</li><li>Dar um motivo novo em cada mensagem.</li></ol></div>
+      <div class="ferramenta"><h3>Mensagem de retomada de orçamento</h3>
+        <div class="script"><p>Oi, [nome]! Aqui é a [atendente], da [clínica]. Estou revendo seu plano de tratamento com o(a) Dr(a). [nome]. Ficou alguma dúvida sobre o que conversamos na avaliação?</p><button type="button" class="copy">Copiar</button></div>
+        <p class="small" style="color:#e3e9e9">Planilha de orçamentos parados: liberada no mini diagnóstico.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao cinza">
+    <div class="wrap stack">
+      <div class="sobre">Caso real</div>
+      <h2>De R$ 55 mil para R$ 115 mil por mês em 3 meses</h2>
+      <p class="muted">Clínica com 3 dentistas, estagnada. A secretária não dava conta do atendimento e não havia retorno dos orçamentos (etapas 1 e 6). Depois de organizar o atendimento e o retorno, o faturamento dobrou e a clínica abriu mais uma cadeira.</p>
+      <div class="card reveal">
+        <div class="caso-graf">
+          <div class="col"><strong>R$ 55 mil</strong><i style="--h:68px"></i><span class="muted">Antes</span></div>
+          <div class="col depois"><strong>R$ 115 mil</strong><i style="--h:142px;transition-delay:.3s"></i><span class="muted">3 meses depois</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="wrap stack">
+      <h2>Veja onde a sua clínica perde e <span class="destaque">quanto isso representa</span></h2>
+      <div class="muted stack" style="gap:6px">
+        <span>No mini diagnóstico você recebe:</span>
+        <span>1. A etapa mais fraca da sua clínica</span>
+        <span>2. A estimativa em reais por mês</span>
+        <span>3. A ferramenta completa dessa etapa</span>
+      </div>
+      <a class="btn btn-full quiz-link" href="/quiz">Calcular o vazamento da minha clínica</a>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape"><div class="wrap">RiseUp Odonto · sistema de captação, conversão e retenção</div></footer>
+
+<script src="/assets/app.js"></script>
+<script>
+(function () {
+  RUApp.lead();
+  document.querySelectorAll(".quiz-link").forEach((a) => (a.href = RUApp.linkComLead("/quiz")));
+  const nome = RUApp.lerLocal("ru_nome");
+  if (nome) document.getElementById("saudacao").textContent = `Seu guia está pronto, ${nome.split(" ")[0]}`;
+  RUApp.ativarCopiar();
+  RUApp.revelar();
+
+  const barra = document.getElementById("barra");
+  const rotulo = document.getElementById("etapa-atual");
+  const etapas = [...document.querySelectorAll(".etapa")];
+  const links = [...document.querySelectorAll("#mapa a:not(.naosei)")];
+  function atualizar() {
+    const h = document.documentElement;
+    const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    barra.style.width = Math.min(100, p * 100) + "%";
+    let atual = null;
+    etapas.forEach((s) => { if (s.getBoundingClientRect().top < innerHeight * 0.4) atual = s; });
+    rotulo.textContent = atual ? `Etapa ${atual.dataset.n} de 6 · ${atual.dataset.nome}` : "Guia";
+    links.forEach((a, i) => a.classList.toggle("ativo", atual ? i < Number(atual.dataset.n) : false));
+  }
+  addEventListener("scroll", atualizar, { passive: true });
+  atualizar();
+})();
+</script>
+</body>
+</html>
