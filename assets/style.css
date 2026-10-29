@@ -100,7 +100,9 @@ a { color: var(--ciano-escuro); }
 .banner > * { position: relative; }
 .banner .circ { position: absolute; border-radius: 50%; border: 1px solid rgba(11,122,119,.45); }
 .banner-logo { height: 34px; width: auto; align-self: flex-start; }
-.banner-visual { height: 230px; }
+.banner-visual { height: 240px; }
+.banner .dente { position: absolute; left: -6%; top: -18px; width: 62%; max-width: 290px; height: auto; mix-blend-mode: screen; animation: flutua 5s ease-in-out infinite; }
+@keyframes flutua { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .banner .capa {
   position: absolute; left: 4%; top: 24px; width: 44%; max-width: 160px; height: 190px;
   border-radius: 12px; background: var(--ciano); color: var(--preto); padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px;
