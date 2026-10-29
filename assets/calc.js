@@ -7,8 +7,8 @@
     { etapa: "Fechamento", p: "De cada 10 orçamentos apresentados, quantos fecham?", o: ["Até 2", "3 a 4", "5 a 6", "7 ou mais", "Não sei"], v: [0.2, 0.35, 0.55, 0.75, null] },
     { etapa: "Valor do tratamento", p: "Qual o valor médio de um tratamento fechado?", o: ["Até R$ 3 mil", "R$ 3 a 8 mil", "R$ 8 a 15 mil", "R$ 15 a 30 mil", "Acima de R$ 30 mil", "Não sei"], v: [2000, 5500, 11500, 22500, 35000, null] },
     { etapa: "Primeira resposta", p: "Quanto tempo leva a primeira resposta a um contato novo?", o: ["Em minutos", "Em até 1 hora", "No mesmo dia", "No dia seguinte ou depois", "Não sei"] },
-    { etapa: "Fechamento", p: "Quando o paciente não fecha, o que mais acontece?", o: ["Diz que achou caro", "Diz que vai pensar ou falar com alguém", "Some sem responder", "Não sei"] },
-    { etapa: "Retorno", p: "O que acontece com o orçamento que não fecha na hora?", o: ["Ninguém retorna", "Uma tentativa de contato", "Rotina definida de retornos", "Não sei"] },
+    { etapa: "Fechamento", p: "Quando o paciente não fecha, o que mais acontece?", o: ["Diz que achou caro", "Diz que vai comparar com outras clínicas", "Diz que vai pensar", "Precisa falar com cônjuge, família ou sócio", "Tem medo ou dúvida sobre o tratamento", "Diz que vai começar depois", "Some sem responder", "Outro motivo", "Não sei"], outro: 7 },
+    { etapa: "Retorno", p: "O que acontece com o orçamento que não fecha na hora?", o: ["Ninguém retorna", "Só retorna se o paciente chamar", "Uma tentativa de contato", "Duas ou três tentativas, sem datas definidas", "Rotina definida, com datas e mensagens", "Não sei"] },
   ];
 
   const s = (t) => `<div class="script"><p>${t}</p><button type="button" class="copy">Copiar</button></div>`;
@@ -121,18 +121,18 @@
     let etapa;
     if (naoMede) {
       if (q6 === 3) etapa = "primeira";
-      else if (q8 === 0) etapa = "retorno";
-      else if (q7 === 1) etapa = "fechamento";
-      else if (q7 === 0) etapa = "orcamento";
+      else if (q8 === 0 || q8 === 1) etapa = "retorno";
+      else if ([2, 3, 4, 5].includes(q7)) etapa = "fechamento";
+      else if (q7 === 0 || q7 === 1) etapa = "orcamento";
       else etapa = "primeira";
     } else {
       const ponto = conhecidas.reduce((m, t) => (t[1] < m[1] ? t : m))[0];
       if (ponto === "agendamento") etapa = q6 === 2 || q6 === 3 ? "primeira" : "agendamento";
       else if (ponto === "comparecimento") etapa = "comparecimento";
-      else if (q7 === 0) etapa = "orcamento";
-      else if (q7 === 1) etapa = "fechamento";
-      else if (q7 === 2) etapa = "retorno";
-      else etapa = q8 === 0 || q8 === 1 ? "retorno" : "fechamento";
+      else if (q7 === 0 || q7 === 1) etapa = "orcamento";
+      else if ([2, 3, 4, 5].includes(q7)) etapa = "fechamento";
+      else if (q7 === 6) etapa = "retorno";
+      else etapa = [0, 1, 2, 3].includes(q8) ? "retorno" : "fechamento";
     }
 
     let estimativa = null, ranking = [], funil = null, faturamento = null;
@@ -167,11 +167,23 @@
     const alertas = [];
     if (q6 === 2) alertas.push(["Primeira resposta no mesmo dia.", "Para quem pesquisa várias clínicas, horas de espera já são tempo suficiente para fechar com outra."]);
     if (q6 === 3) alertas.push(["Primeira resposta no dia seguinte.", "Parte dos contatos esfria antes de ser atendida."]);
-    if (q7 === 0) alertas.push(["O preço vira a principal objeção.", "Sinal de que o valor do tratamento não ficou claro antes do preço."]);
-    if (q7 === 1) alertas.push(["O paciente sai para pensar.", "Sem uma pergunta sobre o que falta, a decisão fica com ele."]);
-    if (q7 === 2) alertas.push(["O paciente some depois do orçamento.", "Falta acompanhamento logo após a avaliação."]);
-    if (q8 === 0) alertas.push(["Orçamentos sem nenhum retorno.", "Quem não fechou na hora dificilmente volta sozinho."]);
-    if (q8 === 1) alertas.push(["Só uma tentativa de retorno.", "Uma mensagem só costuma não ser suficiente para retomar a decisão."]);
+    const a7 = [
+      ["O preço vira a principal objeção.", "Sinal de que o valor do tratamento não ficou claro antes do preço."],
+      ["O paciente sai para comparar preço.", "Sinal de que o valor do plano não ficou claro na avaliação."],
+      ["O paciente sai para pensar.", "Sem uma pergunta sobre o que falta, a decisão fica com ele."],
+      ["Quem decide não estava na avaliação.", "A decisão sai da sala junto com o paciente."],
+      ["O receio do tratamento não foi respondido.", "Sem resposta para a dúvida, o paciente adia."],
+      ["O paciente deixa para começar depois.", "Sem uma data combinada, o \"depois\" costuma esfriar."],
+      ["O paciente some depois do orçamento.", "Falta acompanhamento logo após a avaliação."],
+    ][q7];
+    if (a7) alertas.push(a7);
+    const a8 = [
+      ["Orçamentos sem nenhum retorno.", "Quem não fechou na hora dificilmente volta sozinho."],
+      ["Retorno só quando o paciente chama.", "Quem não fechou na hora dificilmente volta sozinho."],
+      ["Só uma tentativa de retorno.", "Uma mensagem só costuma não ser suficiente para retomar a decisão."],
+      ["Retorno sem rotina definida.", "As tentativas dependem da memória de alguém, e muitos orçamentos ficam sem contato."],
+    ][q8];
+    if (a8) alertas.push(a8);
 
     return {
       etapa,
@@ -188,8 +200,12 @@
     };
   }
 
-  function respostasTexto(a) {
-    return QUESTOES.map((q, i) => `${i + 1}. ${q.p} ${q.o[a[i]]}`).join("\n");
+  function respostasTexto(a, outroTexto) {
+    return QUESTOES.map((q, i) => {
+      let r = q.o[a[i]];
+      if (q.outro === a[i] && outroTexto) r += `: ${outroTexto}`;
+      return `${i + 1}. ${q.p} ${r}`;
+    }).join("\n");
   }
 
   window.RU = { QUESTOES, ETAPAS, NAO_MEDE, calcular, validar, respostasTexto, texto };

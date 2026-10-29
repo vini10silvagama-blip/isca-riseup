@@ -29,6 +29,7 @@
   const Q = RU.QUESTOES;
   const respostas = new Array(Q.length).fill(null);
   let passo = 0;
+  let outroTexto = "";
   const tela = document.getElementById("tela");
 
   function esc(t) { return t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]); }
@@ -45,6 +46,12 @@
       <h1 class="fade" style="font-size:clamp(22px,4.4vw,30px)">${esc(q.p)}</h1>
       <p class="muted small fade">Responda de cabeça. Não precisa ser exato.</p>
       <div class="opcoes fade">${q.o.map((o, i) => `<button type="button" class="opcao${respostas[passo] === i ? " sel" : ""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+      <div class="campo fade" id="outro-box" hidden>
+        <label for="outro">Qual é o motivo?</label>
+        <input id="outro" maxlength="200" placeholder="Escreva em poucas palavras" value="${esc(outroTexto)}">
+        <p class="erro" id="outro-erro" role="alert"></p>
+        <button type="button" class="btn" id="outro-ok">Continuar</button>
+      </div>
       <div class="quiz-nav"><button type="button" class="btn btn-outline" id="voltar" ${passo === 0 ? "disabled" : ""}>Voltar</button></div>`;
     tela.querySelectorAll(".opcao").forEach((b) => b.addEventListener("click", () => escolher(Number(b.dataset.i))));
     document.getElementById("voltar").addEventListener("click", () => { if (passo > 0) { passo--; render(); } });
@@ -52,9 +59,28 @@
   }
 
   function escolher(i) {
+    const q = Q[passo];
+    if (q.outro === i) { abrirOutro(i); return; }
     respostas[passo] = i;
     if (passo < Q.length - 1) { passo++; render(); }
     else finalizar();
+  }
+
+  function abrirOutro(i) {
+    tela.querySelectorAll(".opcao").forEach((b) => b.classList.toggle("sel", Number(b.dataset.i) === i));
+    const box = document.getElementById("outro-box");
+    const campo = document.getElementById("outro");
+    const erro = document.getElementById("outro-erro");
+    box.hidden = false;
+    campo.focus();
+    campo.addEventListener("input", () => (erro.textContent = ""));
+    document.getElementById("outro-ok").onclick = () => {
+      const t = campo.value.trim();
+      if (t.length < 3) { erro.textContent = "Escreva o motivo ou escolha outra opção."; return; }
+      outroTexto = t;
+      respostas[passo] = i;
+      if (passo < Q.length - 1) { passo++; render(); } else finalizar();
+    };
   }
 
   async function finalizar() {
@@ -78,7 +104,7 @@
         lead: leadId,
         etapa: r.notionEtapa,
         estimativa: r.estimativa !== null ? Math.round(r.estimativa) : null,
-        respostas: RU.respostasTexto(respostas),
+        respostas: RU.respostasTexto(respostas, Q[6].outro === respostas[6] ? outroTexto : ""),
         resultado: url.toString(),
       }),
     }).catch(() => {});
