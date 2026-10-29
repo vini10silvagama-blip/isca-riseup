@@ -57,5 +57,21 @@
     a.remove();
   }
 
+  // Barra fina no topo enquanto a próxima página carrega.
+  function carregamento() {
+    const b = document.createElement("div");
+    b.id = "carregando";
+    document.body.appendChild(b);
+    document.addEventListener("click", (ev) => {
+      const l = ev.target.closest("a[href]");
+      if (!l || l.target === "_blank" || l.hasAttribute("download") || ev.metaKey || ev.ctrlKey) return;
+      const u = new URL(l.href, location.href);
+      if (u.origin !== location.origin || (u.pathname === location.pathname && u.hash)) return;
+      b.classList.add("on");
+    });
+    addEventListener("pageshow", () => b.classList.remove("on"));
+  }
+  if (document.body) carregamento(); else addEventListener("DOMContentLoaded", carregamento);
+
   window.RUApp = { params, lead, linkComLead, ativarCopiar, revelar, baixarPlanilha, lerLocal, gravarLocal };
 })();

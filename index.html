@@ -41,7 +41,7 @@
       <div class="chips"><span>8 perguntas</span><span>2 minutos</span><span>Resultado na hora</span></div>
     </div>
 
-    <div class="stack cap-texto">
+    <div class="stack cap-texto entra">
       <div class="sobre">Diagnóstico gratuito para donos de clínica</div>
       <h1>Quanto a sua clínica deixa de faturar <span class="destaque">depois que o lead chega</span>?</h1>
       <p class="muted">Responda 8 perguntas e veja em qual etapa os pacientes se perdem, com a estimativa em reais.</p>
@@ -115,7 +115,7 @@
     if (!dados.consentimento) return (erro.textContent = "Marque a caixa de consentimento para continuar.");
 
     botao.disabled = true;
-    botao.textContent = "Enviando...";
+    botao.innerHTML = '<span class="gira" aria-hidden="true"></span>Preparando seu guia...';
     let leadId = "";
     for (let tentativa = 0; tentativa < 2 && !leadId; tentativa++) {
       try {
