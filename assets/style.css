@@ -39,8 +39,9 @@ a { color: var(--ciano-escuro); }
 .topo { border-bottom: 1px solid var(--borda); background: var(--branco); }
 .topo .wrap, .topo .wrap-largo { display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--preto); }
-.logo span.marca { width: 30px; height: 30px; border-radius: 50%; background: var(--ciano); display: inline-block; }
-.logo strong { font-style: italic; font-weight: 500; }
+.logo img { display: block; }
+.logo .logo-full { height: 36px; width: auto; }
+.logo .logo-simb { display: none; height: 32px; width: 32px; }
 
 .sobre { font-size: 14px; font-weight: 500; color: var(--ciano-escuro); }
 .muted { color: var(--cinza-texto); }
@@ -117,7 +118,7 @@ a { color: var(--ciano-escuro); }
 .progresso { position: sticky; top: 0; z-index: 10; background: var(--branco); border-bottom: 1px solid var(--borda); }
 .progresso .wrap { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
 .progresso .linha { display: flex; justify-content: space-between; align-items: center; }
-@media (max-width: 480px) { .progresso .logo strong { display: none; } }
+@media (max-width: 480px) { .progresso .logo .logo-full { display: none; } .progresso .logo .logo-simb { display: block; } }
 .barra { height: 4px; border-radius: 999px; background: var(--borda); overflow: hidden; }
 .barra i { display: block; height: 100%; width: 0; background: var(--ciano); transition: width .2s linear; }
 
