@@ -3,7 +3,7 @@
 // Caso contrário, cria uma linha nova.
 import { notion, buscar, baseId, hoje, texto, titulo, selecao, data, lerCorpo } from "./_notion.js";
 
-const FAIXAS = ["Até R$ 70 mil", "R$ 70 a 150 mil", "Acima de R$ 150 mil"];
+const FAIXAS = ["Até R$ 30 mil", "R$ 30 a 50 mil", "R$ 50 a 70 mil", "R$ 70 a 100 mil", "R$ 100 a 150 mil", "R$ 150 a 300 mil", "Acima de R$ 300 mil"];
 const ORIGENS = ["Prospecção", "Instagram", "Anúncio"];
 
 export default async function handler(req, res) {

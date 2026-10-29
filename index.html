@@ -17,35 +17,38 @@
 
 <div class="wrap-largo">
   <div class="captura">
-    <div class="banner" aria-hidden="true">
-      <span class="circ" style="width:280px;height:280px;left:-70px;bottom:-110px"></span>
-      <span class="circ" style="width:170px;height:170px;left:-15px;bottom:-55px"></span>
-      <span class="circ" style="width:220px;height:220px;right:-90px;top:-90px"></span>
-      <div class="capa"><small>Guia</small><b>Depois que o lead chega</b></div>
-      <div class="cel">
-        <div class="l1">Mini diagnóstico</div>
-        <div class="l2">Etapa mais fraca</div>
-        <div class="l3">Fechamento</div>
-        <div class="valor">R$ por mês</div>
-        <div class="b" style="width:100%"></div>
-        <div class="b" style="width:62%"></div>
-        <div class="b" style="width:40%"></div>
-        <div class="b" style="width:18%;background:#141414"></div>
+    <div class="banner">
+      <span class="circ" aria-hidden="true" style="width:280px;height:280px;left:-90px;bottom:-130px"></span>
+      <span class="circ" aria-hidden="true" style="width:220px;height:220px;right:-90px;top:-90px"></span>
+      <img class="banner-logo" src="/assets/logo-branca.png" alt="RiseUp Odonto" width="138" height="40">
+      <div class="banner-visual" aria-hidden="true">
+        <div class="capa"><small>Guia</small><b>Depois que o lead chega</b><span>As 6 etapas do primeiro contato ao fechamento</span></div>
+        <div class="cel">
+          <div class="cel-topo"><span class="l1">Mini diagnóstico</span><span class="ex">Exemplo</span></div>
+          <div class="l2">Etapa mais fraca</div>
+          <div class="l3">Fechamento</div>
+          <div class="valor">Cerca de R$ 24 mil<small>/mês</small></div>
+          <div class="b" style="width:100%"></div>
+          <div class="b" style="width:40%"></div>
+          <div class="b" style="width:28%"></div>
+          <div class="b" style="width:9%;background:#141414"></div>
+        </div>
       </div>
+      <ul class="banner-itens">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span><strong>Mini diagnóstico</strong> com a etapa mais fraca e a estimativa mensal</span></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/></svg><span><strong>Guia das 6 etapas</strong>, do primeiro contato ao fechamento</span></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span><strong>Scripts prontos</strong> para a recepção usar no WhatsApp</span></li>
+      </ul>
+      <div class="chips"><span>8 perguntas</span><span>2 minutos</span><span>Resultado na hora</span></div>
     </div>
 
-    <div class="stack">
+    <div class="stack cap-texto">
       <div class="sobre">Diagnóstico gratuito para donos de clínica</div>
       <h1>Quanto a sua clínica deixa de faturar <span class="destaque">depois que o lead chega</span>?</h1>
       <p class="muted">Responda 8 perguntas e veja em qual etapa os pacientes se perdem, com a estimativa em reais.</p>
-      <div class="receber">
-        <strong>O que você recebe</strong>
-        <span>1. Mini diagnóstico com a etapa mais fraca e a estimativa mensal</span>
-        <span>2. Guia das 6 etapas, do primeiro contato ao fechamento</span>
-        <span>3. Scripts prontos para a recepção usar</span>
-      </div>
+    </div>
 
-      <form id="form" class="stack" novalidate>
+      <form id="form" class="stack cap-form" novalidate>
         <div class="campo"><label for="nome">Seu nome</label><input id="nome" name="nome" autocomplete="name" placeholder="Como podemos te chamar" maxlength="80" required></div>
         <div class="campo"><label for="clinica">Nome da clínica</label><input id="clinica" name="clinica" autocomplete="organization" placeholder="Nome da sua clínica" maxlength="120" required></div>
         <div class="campo"><label for="whatsapp">WhatsApp</label><input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" maxlength="20" required></div>
@@ -53,16 +56,19 @@
         <div class="campo"><label for="faixa">Faturamento mensal da clínica</label>
           <select id="faixa" name="faixa" required>
             <option value="">Selecione uma faixa</option>
-            <option>Até R$ 70 mil</option>
-            <option>R$ 70 a 150 mil</option>
-            <option>Acima de R$ 150 mil</option>
+            <option>Até R$ 30 mil</option>
+            <option>R$ 30 a 50 mil</option>
+            <option>R$ 50 a 70 mil</option>
+            <option>R$ 70 a 100 mil</option>
+            <option>R$ 100 a 150 mil</option>
+            <option>R$ 150 a 300 mil</option>
+            <option>Acima de R$ 300 mil</option>
           </select>
         </div>
         <label class="consentimento"><input type="checkbox" id="lgpd" required><span>Concordo em receber o material e contatos da RiseUp Odonto por WhatsApp e e-mail. Meus dados são usados só para isso, conforme a LGPD.</span></label>
         <p class="erro" id="erro" role="alert"></p>
         <button class="btn btn-full" type="submit" id="enviar">Calcular o vazamento da minha clínica</button>
       </form>
-    </div>
   </div>
 </div>
 
