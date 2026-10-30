@@ -10,7 +10,8 @@ Os leads são gravados na base "Prospecção - Rise Up" do Notion.
 | `/` | Página de captura. Aceita `?c=RU-27` (código do lead da prospecção) e `?o=anuncio` (origem anúncio). Sem nenhum dos dois, a origem é Instagram. Com o código, grava a data em "Abriu o link" no CRM. |
 | `/guia` | Guia das 6 etapas |
 | `/quiz` | Quiz de 8 perguntas. Sem cadastro, manda para a captura e volta para o quiz. |
-| `/resultado?r=...` | Mini diagnóstico. O resultado é calculado a partir das respostas no próprio link. |
+| `/resultado?r=...` | Mini diagnóstico. O resultado é calculado a partir das respostas no próprio link (`n` = clínica, `f` = faixa de faturamento). Tem o botão "Receber o relatório completo". |
+| `/relatorio?r=...&n=...&f=...` | Relatório completo em A4. Abrir, clicar em "Salvar em PDF" e enviar no WhatsApp ou e-mail. Quando o lead pede, o CRM grava "Pediu o relatório", coloca o lead em Hoje e o link fica nas Observações. |
 
 ## Configuração na Vercel
 

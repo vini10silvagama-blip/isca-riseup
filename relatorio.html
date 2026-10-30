@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.png" type="image/png">
+<title>Relatório do mini diagnóstico | RiseUp Odonto</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; background: #e3e9e9; font-family: "Archivo", sans-serif; color: #141414; font-size: 11pt; line-height: 1.5; }
+h1, h2, h3 { font-family: "Poppins", sans-serif; font-weight: 500; margin: 0; line-height: 1.2; }
+p { margin: 0; }
+.barra-topo { position: sticky; top: 0; z-index: 5; background: #141414; color: #fff; padding: 12px 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; font-size: 14px; }
+.barra-topo button { background: #29d9d5; color: #141414; border: 0; border-radius: 999px; padding: 10px 22px; font: inherit; font-weight: 500; cursor: pointer; }
+.barra-topo span { color: #b9c4c4; }
+.pg { width: 210mm; min-height: 297mm; margin: 24px auto; background: #fff; padding: 18mm 17mm 14mm; display: flex; flex-direction: column; gap: 7mm; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+.capa { background: #141414; color: #fff; padding: 22mm 20mm 16mm; }
+.circ { position: absolute; border-radius: 50%; border: 1px solid rgba(41,217,213,.3); }
+.topo { display: flex; justify-content: space-between; align-items: center; font-size: 10pt; color: #4a5252; border-bottom: 1px solid #e3e9e9; padding-bottom: 4mm; }
+.capa .topo { border: 0; color: #b9c4c4; }
+.topo img { height: 9mm; display: block; }
+.sobre { font-size: 10.5pt; font-weight: 500; color: #0b7a77; }
+.capa .sobre { color: #29d9d5; letter-spacing: .06em; }
+.capa h1 { font-size: 38pt; margin-top: 3mm; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4mm; }
+.cards div { border: 1px solid #333; border-radius: 5mm; padding: 5mm; display: flex; flex-direction: column; gap: 1.5mm; background: rgba(20,20,20,.75); }
+.cards small { color: #b9c4c4; font-size: 9.5pt; }
+.cards b { font-family: "Poppins", sans-serif; font-weight: 500; font-size: 15pt; }
+.cards b.c { color: #29d9d5; }
+.rodape { margin-top: auto; display: flex; justify-content: space-between; gap: 6mm; font-size: 9pt; color: #4a5252; border-top: 1px solid #e3e9e9; padding-top: 3mm; }
+.capa .rodape { border-color: #333; color: #b9c4c4; }
+.tabela { border: 1px solid #e3e9e9; border-radius: 5mm; overflow: hidden; }
+.tabela .l { display: grid; grid-template-columns: 9mm 1.2fr 1.7fr 28mm; gap: 3mm; padding: 3.2mm 5mm; border-top: 1px solid #e3e9e9; align-items: center; font-size: 10.5pt; }
+.tabela .l:first-child { border-top: 0; background: #f4f7f7; font-size: 9pt; font-weight: 500; color: #4a5252; }
+.tabela .n { font-family: "Poppins", sans-serif; font-weight: 500; }
+.tabela .forte { background: #fffbf5; }
+.selo { justify-self: start; font-size: 8.5pt; font-weight: 500; border-radius: 999px; padding: 1mm 3mm; }
+.s-ok { background: #e6f8f7; color: #085e5b; } .s-atencao { background: #fff4e5; color: #8a4a0b; } .s-critico { background: #fbe1dd; color: #8e1f12; }
+.s-sem, .s-nao { background: #f4f7f7; color: #4a5252; }
+.cmp { display: flex; flex-direction: column; gap: 4mm; }
+.cmp .row { display: grid; grid-template-columns: 34mm 1fr 34mm; gap: 4mm; align-items: center; font-size: 10pt; }
+.cmp .t { position: relative; height: 4mm; border-radius: 999px; background: #f4f7f7; }
+.cmp .t i { display: block; height: 4mm; border-radius: 999px; }
+.cmp .t em { position: absolute; top: -1.5mm; width: .8mm; height: 7mm; background: #141414; }
+.cmp .t em.top { background: #b9c4c4; }
+.cmp small { color: #4a5252; font-size: 9pt; }
+.nota { background: #f4f7f7; border-radius: 5mm; padding: 5mm; font-size: 10.5pt; }
+.plano { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4mm; }
+.plano div { border: 1px solid #e3e9e9; border-radius: 5mm; padding: 5mm; display: flex; flex-direction: column; gap: 2mm; }
+.plano small { font-size: 9pt; font-weight: 500; color: #0b7a77; }
+.ferr { display: flex; flex-direction: column; gap: 3mm; font-size: 10.5pt; }
+.ferr h4 { margin: 2mm 0 0; font-size: 10.5pt; font-weight: 500; }
+.ferr .script { border: 1px solid #e3e9e9; border-radius: 4mm; padding: 3.5mm 4mm; break-inside: avoid; }
+.ferr .copy, .ferr #baixar-planilha, .ferr button { display: none; }
+.ferr .tool-rule { color: #4a5252; }
+.ferr .steps { margin: 0; padding-left: 5mm; display: flex; flex-direction: column; gap: 2mm; color: #4a5252; }
+.ferr .steps strong { color: #141414; font-weight: 500; }
+.convite { background: #141414; color: #fff; border-radius: 6mm; padding: 7mm; display: flex; justify-content: space-between; align-items: center; gap: 6mm; }
+.convite p { color: #e3e9e9; font-size: 10.5pt; margin-top: 2mm; }
+.convite a { flex-shrink: 0; background: #29d9d5; color: #141414; text-decoration: none; font-weight: 500; border-radius: 999px; padding: 3.5mm 6mm; }
+.fluxo { min-height: 0; }
+@media print {
+  body { background: #fff; }
+  .barra-topo { display: none; }
+  .pg { margin: 0; box-shadow: none; page-break-after: always; }
+  .pg:last-child { page-break-after: auto; }
+}
+@media screen and (max-width: 820px) {
+  .pg { width: auto; min-height: 0; margin: 12px; padding: 22px 18px; }
+  .tabela .l { grid-template-columns: 22px 1fr 84px; }
+  .tabela .l span:nth-child(3) { display: none; }
+  .cmp .row { grid-template-columns: 1fr; }
+  .cards, .plano { grid-template-columns: 1fr; }
+  .convite { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="barra-topo"><span>Para enviar: clique em "Salvar em PDF", escolha "Salvar como PDF", margens "Nenhuma" e marque "Gráficos de plano de fundo".</span><button type="button" onclick="window.print()">Salvar em PDF</button></div>
+<div id="paginas"></div>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/calc.js"></script>
+<script>
+(function () {
+  const p = new URLSearchParams(location.search);
+  const alvo = document.getElementById("paginas");
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const a = (p.get("r") || "").split("").map(Number);
+  if (!RU.validar(a)) { alvo.innerHTML = `<div class="pg"><h2>Relatório não encontrado</h2><p>O link parece incompleto.</p></div>`; return; }
+
+  const faixa = Object.keys(RU.FAIXAS)[Number(p.get("f"))] || "";
+  const r = RU.calcular(a, { faixa });
+  const clinica = (p.get("n") || "").slice(0, 120) || "[Nome da clínica]";
+  const dataTxt = new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+  const k = (v) => Math.round(v / 1000).toLocaleString("pt-BR");
+  const nomeEtapa = r.naoMede ? "Não mede o funil" : r.etapaNome;
+  const ganho = r.modo === "top" ? r.ganhoTop : r.estimativa;
+  const temGanho = r.hoje !== null && ganho > 0;
+
+  const topo = `<div class="topo"><img src="/assets/logo.png" alt="RiseUp Odonto"><span>${esc(clinica)}</span></div>`;
+  const rodape = (n) => `<div class="rodape"><span>Referências: Henry Schein One (2026); revisão científica sobre faltas (2018); Harvard Business Review (2011). Estimativa com os dados informados; não é promessa de resultado.</span><span>Página ${n}</span></div>`;
+
+  const capa = `
+  <section class="pg capa">
+    <span class="circ" style="width:150mm;height:150mm;right:-45mm;top:70mm"></span>
+    <span class="circ" style="width:110mm;height:110mm;right:-25mm;top:90mm;border-color:rgba(41,217,213,.45)"></span>
+    <div class="topo"><img src="/assets/logo-branca.png" alt="RiseUp Odonto"><span>${dataTxt}</span></div>
+    <div style="margin-top:38mm;display:flex;flex-direction:column;gap:4mm;max-width:130mm;position:relative">
+      <span class="sobre">RELATÓRIO DO MINI DIAGNÓSTICO</span>
+      <h1>Depois que o lead chega</h1>
+      <span style="font-size:15pt;color:#e3e9e9">Preparado para <b style="font-weight:500;color:#fff">${esc(clinica)}</b></span>
+    </div>
+    <div class="cards" style="margin-top:22mm;max-width:160mm;position:relative">
+      <div><small>Etapa mais fraca</small><b>${esc(nomeEtapa)}</b></div>
+      <div><small>${r.modo === "top" ? "Nível das melhores" : "Chegando à média"}</small><b class="c">${temGanho ? `+ R$ ${k(ganho)} mil/mês` : "Calcular na reunião"}</b></div>
+      <div><small>Em um ano</small><b>${temGanho ? `+ R$ ${k(ganho * 12)} mil` : "—"}</b></div>
+    </div>
+    <div class="rodape" style="position:relative"><span>Preparado por <b style="color:#fff;font-weight:500">Vinicius Gama · RiseUp Odonto</b></span><span>Sistema de captação, conversão e retenção</span></div>
+  </section>`;
+
+  const cmpRows = r.comparacoes.map((c) => {
+    const cor = c.chave === "comparecimento" ? "#f2a33a" : c.chave === "fechamento" ? "#29d9d5" : "#141414";
+    if (c.valor === null) return `<div class="row"><b style="font-weight:500">${c.nome}</b><div class="t"></div><small>Não medido</small></div>`;
+    return `<div class="row"><b style="font-weight:500">${c.nome} · ${RU.pct(c.valor)}</b><div class="t"><i style="width:${Math.round(c.valor * 100)}%;background:${cor}"></i>${c.media ? `<em style="left:${Math.round(c.media * 100)}%"></em>` : ""}${c.top ? `<em class="top" style="left:${Math.round(c.top * 100)}%"></em>` : ""}</div><small>${c.media ? `Média ${RU.pct(c.media)}${c.top ? ` · melhores ${RU.pct(c.top)}` : ""}` : "Sem referência"}</small></div>`;
+  }).join("");
+
+  const pagina2 = `
+  <section class="pg">
+    ${topo}
+    <div><span class="sobre">As 6 etapas da sua clínica</span><h2 style="font-size:22pt;margin-top:2mm">Onde os pacientes se perdem hoje</h2></div>
+    <p>${esc(r.abertura)}</p>
+    <div class="tabela">
+      <div class="l"><span>#</span><span>Etapa</span><span>O que as respostas mostram</span><span>Situação</span></div>
+      ${r.status.map((s, i) => `<div class="l${s.s === "critico" ? " forte" : ""}"><span class="n">${i + 1}</span><b style="font-weight:500">${s.nome}</b><span style="color:#4a5252">${esc(s.leitura)}</span><span class="selo s-${s.s}">${s.situacao}</span></div>`).join("")}
+    </div>
+    <div><span class="sobre">Seu funil comparado à média</span></div>
+    <div class="cmp">${cmpRows}</div>
+    ${temGanho ? `<div class="nota">Hoje, os contatos novos geram cerca de <b style="font-weight:500">R$ ${k(r.hoje)} mil por mês</b>. ${r.modo === "top" ? "No nível das melhores clínicas no fechamento" : "Chegando à média do mercado"}, seriam cerca de <b style="font-weight:500">R$ ${k(r.hoje + ganho)} mil</b>.${r.cruzamento ? " " + esc(r.cruzamento) : ""}</div>` : (r.cruzamento ? `<div class="nota">${esc(r.cruzamento)}</div>` : "")}
+    ${rodape(2)}
+  </section>`;
+
+  const pagina3 = `
+  <section class="pg">
+    ${topo}
+    <div><span class="sobre">Ferramenta da etapa mais fraca</span><h2 style="font-size:22pt;margin-top:2mm">${esc(r.ferramenta)}</h2></div>
+    <div class="ferr">${r.ferramentaHtml}</div>
+    ${rodape(3)}
+  </section>`;
+
+  const pagina4 = `
+  <section class="pg">
+    ${topo}
+    <div><span class="sobre">Plano de 30 dias</span><h2 style="font-size:22pt;margin-top:2mm">Um passo por semana</h2></div>
+    <div class="plano">${r.plano.map((t, i) => `<div><small>Semana ${i + 1}</small><span>${esc(t)}</span></div>`).join("")}</div>
+    <div class="nota"><b style="font-weight:500">O que só os números da clínica mostram.</b> De fora, o diagnóstico vai até aqui. Na reunião, olhamos juntos quanto existe em orçamentos parados, o comparecimento real na agenda e de onde vem o faturamento.</div>
+    <div class="convite"><div><h3 style="font-size:15pt">Quer montar esse plano com os números da clínica?</h3><p>Reunião de 30 minutos, gratuita. Você sai com o plano das 2 etapas mais fracas e uma meta para 90 dias.</p></div><a href="${esc(RU_CONFIG.agendaUrl(p.get("n") || "", nomeEtapa))}">Agendar no WhatsApp</a></div>
+    ${rodape(4)}
+  </section>`;
+
+  alvo.innerHTML = capa + pagina2 + pagina3 + pagina4;
+  document.title = `Relatório · ${clinica} | RiseUp Odonto`;
+})();
+</script>
+</body>
+</html>

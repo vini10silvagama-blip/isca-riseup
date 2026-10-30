@@ -12,12 +12,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
 </head>
-<body>
+<body class="res">
 <header class="topo"><div class="wrap"><a class="logo" href="/guia" id="link-guia"><img class="logo-full" src="/assets/logo.png" alt="RiseUp Odonto" width="138" height="40"><img class="logo-simb" src="/assets/simbolo.png" alt="RiseUp Odonto" width="34" height="34"></a><span class="small muted" id="data"></span></div></header>
 
 <main id="conteudo"></main>
-
-<footer class="rodape"><div class="wrap">Estimativa calculada apenas com os dados informados por você. Não é promessa de resultado. · RiseUp Odonto</div></footer>
 
 <script src="/assets/config.js"></script>
 <script src="/assets/calc.js"></script>
@@ -25,7 +23,7 @@
 <script>
 (function () {
   const p = RUApp.params;
-  RUApp.lead();
+  const leadId = RUApp.lead();
   document.getElementById("link-guia").href = RUApp.linkComLead("/guia");
   document.getElementById("data").textContent = new Date().toLocaleDateString("pt-BR");
   const main = document.getElementById("conteudo");
@@ -37,116 +35,208 @@
     return;
   }
 
-  const r = RU.calcular(a);
-  const etapa = RU.ETAPAS[r.etapa];
-  const clinica = (p.get("n") || "").slice(0, 120);
-  const titulo = r.naoMede ? `Sua clínica <span class="destaque">não mede o funil</span>` : `Sua etapa mais fraca: <span class="destaque">${esc(etapa.nome)}</span>`;
-  const explicacao = r.naoMede ? RU.NAO_MEDE.explicacao : etapa.explicacao;
+  const faixas = Object.keys(RU.FAIXAS);
+  const faixa = faixas[Number(p.get("f"))] || RUApp.lerLocal("ru_faixa") || "";
+  const r = RU.calcular(a, { faixa });
+  const clinica = (p.get("n") || RUApp.lerLocal("ru_clinica") || "").slice(0, 120);
+  const k = (v) => Math.round(v / 1000);
+  const nomeEtapa = r.naoMede ? "Não mede o funil" : r.etapaNome;
 
-  let estimativa = "";
-  if (r.estimativa !== null) {
-    const k = Math.round(r.estimativa / 1000);
-    estimativa = `
-      <div class="estimativa">
-        <span class="small" style="color:#e3e9e9">Estimativa com os seus números</span>
-        <div class="num">${k < 1 ? "Menos de R$ 1 mil" : `Cerca de R$ <span id="contador" data-alvo="${k}">0</span> mil`} <small>por mês</small></div>
-        <span style="color:#e3e9e9;font-size:15px">${({
-          fechamento: "É quanto representa fechar 1 orçamento a mais a cada 10 apresentados.",
-          agendamento: "É quanto representa agendar 1 avaliação a mais a cada 10 contatos.",
-          comparecimento: "É quanto representa 1 paciente a mais comparecer a cada 10 agendados.",
-        })[r.ranking.find((x) => x.valor === r.estimativa).chave]}</span>
+  // 1. Abertura
+  const titulo = r.naoMede
+    ? `Sua clínica <span class="destaque">não mede o funil</span>`
+    : r.modo === "top"
+      ? `Seu funil já está <span class="destaque">na média</span>`
+      : `Sua etapa mais fraca é <span class="destaque">${esc(r.etapaNome.toLowerCase())}</span>`;
+
+  // 2. Painel com o anel
+  let painel;
+  if (r.hoje !== null && (r.modo === "top" ? r.ganhoTop > 0 : r.estimativa > 0)) {
+    const ganho = r.modo === "top" ? r.ganhoTop : r.estimativa;
+    const aumento = ganho / r.hoje;
+    const offset = Math.round(302 * (1 - Math.min(aumento, 1)));
+    const quebra = r.modo === "top" ? "" : `
+      <div class="p-quebra">
+        ${r.ganhoComp > 500 ? `<div><span>Só o comparecimento</span><b>+ R$ ${k(r.ganhoComp).toLocaleString("pt-BR")} mil/mês</b></div>` : ""}
+        ${r.ganhoFech > 500 ? `<div><span>Só o fechamento</span><b>+ R$ ${k(r.ganhoFech).toLocaleString("pt-BR")} mil/mês</b></div>` : ""}
       </div>`;
-  } else if (!r.naoMede) {
-    estimativa = `<div class="alerta">Sem a estimativa em reais: para calcular, é preciso responder o volume de contatos, as três taxas e o valor médio do tratamento.</div>`;
+    painel = `
+      <div class="painel reveal">
+        <span class="p-rot">${r.modo === "top" ? "CHEGANDO AO NÍVEL DAS MELHORES CLÍNICAS NO FECHAMENTO" : "CHEGANDO À MÉDIA DO MERCADO"}</span>
+        <div class="p-linha">
+          <svg class="anel" viewBox="0 0 110 110" role="img" aria-label="Faturamento ${Math.round(aumento * 100)}% maior">
+            <circle cx="55" cy="55" r="48" class="anel-fundo"></circle>
+            <circle cx="55" cy="55" r="48" class="anel-arco" style="--off:${offset}" transform="rotate(-90 55 55)"></circle>
+            <text x="55" y="53" text-anchor="middle" class="anel-num">+${Math.round(aumento * 100)}%</text>
+            <text x="55" y="71" text-anchor="middle" class="anel-leg">faturamento</text>
+          </svg>
+          <div class="p-nums">
+            <b class="p-mes">+R$ <span class="contar" data-alvo="${k(ganho)}">${k(ganho).toLocaleString("pt-BR")}</span> mil</b>
+            <small>por mês</small>
+            <b class="p-ano">R$ <span class="contar" data-alvo="${k(ganho * 12)}">${k(ganho * 12).toLocaleString("pt-BR")}</span> mil por ano</b>
+          </div>
+        </div>
+        <div class="p-base"><span>Hoje: R$ ${k(r.hoje).toLocaleString("pt-BR")} mil/mês</span><span>${r.modo === "top" ? "No nível das melhores" : "Na média"}: R$ ${k(r.hoje + ganho).toLocaleString("pt-BR")} mil/mês</span></div>
+        ${quebra}
+        <small class="p-nota">Calculado só com os números que você informou${r.estimadas.length ? `; ${r.estimadas.join(" e ").toLowerCase()} estimado${r.estimadas.length > 1 ? "s" : ""} pela média do mercado` : ""}. ${r.modo === "top" ? "" : "Comparamos com a média, não com as melhores clínicas. "}Não é promessa de resultado.</small>
+      </div>`;
+  } else {
+    painel = `<div class="painel reveal"><span class="p-rot">ESTIMATIVA EM REAIS</span><p style="color:#e3e9e9">Para calcular em reais, é preciso responder o volume de contatos, quantos agendam e o valor médio do tratamento. Na reunião, fazemos essa conta com os números da clínica.</p></div>`;
   }
 
+  // 3. Funil e comparação com a média
   let funil = "";
   if (r.funil) {
     const max = r.funil[0].n || 1;
-    const pior = r.naoMede ? -1 : ({ primeira: 1, agendamento: 1, comparecimento: 2, orcamento: 3, fechamento: 3, retorno: 3 })[r.etapa];
+    const cor = { 2: r.etapa === "comparecimento" ? "laranja" : "escuro", 3: ["fechamento", "orcamento", "retorno"].includes(r.etapa) ? "ciano" : "escuro" };
     funil = `
-      <div class="stack reveal" style="gap:12px">
-        <h3>Seu funil hoje</h3>
-        <div class="funil">${r.funil.map((f, i) => `
-          <div class="row"><div class="rot"><span>${f.rotulo}</span><span>${f.n.toLocaleString("pt-BR")}</span></div>
-          <div class="trilho"><i class="${i === pior ? "fraco" : ""}" style="--w:${Math.max(2, (f.n / max) * 100)}%;transition-delay:${i * 0.3}s"></i></div></div>`).join("")}
+      <section class="wrap bloco reveal">
+        <div class="bloco-tit"><h2>Seu funil hoje</h2><span class="small muted">por mês</span></div>
+        <div class="colunas">${r.funil.map((f, i) => `
+          <div class="col"><b class="${cor[i] === "laranja" ? "t-laranja" : ""}">${f.n.toLocaleString("pt-BR")}</b><i class="c-${cor[i] || "escuro"}" style="--h:${Math.max(4, Math.round((f.n / max) * 100))}%;transition-delay:${i * 0.2}s"></i></div>`).join("")}
         </div>
-        <p class="small muted">Valores aproximados, a partir das faixas que você marcou.</p>
-      </div>`;
+        <div class="colunas-rot">${r.funil.map((f) => `<span>${f.rotulo}${f.estimado ? "*" : ""}</span>`).join("")}</div>
+        ${r.funil.some((f) => f.estimado) ? `<p class="small muted">* estimado com a média do mercado</p>` : ""}
+      </section>`;
   }
 
-  let ranking = "";
-  if (r.ranking.length) {
-    const max = r.ranking[0].valor || 1;
-    ranking = `
-      <div class="card reveal" style="background:var(--cinza-fundo)">
-        <h3>Onde melhorar 1 em cada 10 rende mais</h3>
-        <div class="funil" style="margin-top:10px">${r.ranking.map((x, i) => `
-          <div class="row"><div class="rot"><span${i === 0 ? ' style="font-weight:500"' : ""}>${x.nome}</span><span>${RU.texto(x.valor).replace("cerca de ", "")}</span></div>
-          <div class="trilho"><i class="${i === 0 ? "fraco" : ""}" style="--w:${Math.max(3, (x.valor / max) * 100)}%;transition-delay:${0.4 + i * 0.25}s"></i></div></div>`).join("")}
-        </div>
-      </div>`;
-  }
-
-  const naoAvaliadas = r.naoAvaliadas.length && !r.naoMede ? `<p class="small muted">Não avaliada por falta de resposta: ${r.naoAvaliadas.join(", ")}.</p>` : "";
-
-  const alertas = r.alertas.length ? `
-    <div class="stack" style="gap:10px">
-      <h3>Pontos de atenção</h3>
-      <div class="stack stagger" style="gap:10px">${r.alertas.map((x, i) => `<div class="alerta" style="animation-delay:${1 + i * 0.3}s"><strong>${x[0]}</strong> ${x[1]}</div>`).join("")}</div>
-    </div>` : "";
-
-  main.innerHTML = `
-    <section class="secao">
-      <div class="wrap stack entra" style="gap:22px">
-        <div class="sobre">Mini diagnóstico${clinica ? " · " + esc(clinica) : ""}</div>
-        <h1>${titulo}</h1>
-        <p class="muted">${esc(explicacao)}</p>
-        ${estimativa}
-        ${funil}
-        ${naoAvaliadas}
-        ${ranking}
-        ${alertas}
-      </div>
-    </section>
-    <section class="secao cinza">
-      <div class="wrap stack">
-        <div class="sobre">Liberado para você</div>
-        <h2>${esc(etapa.ferramenta)}</h2>
-        <div>${etapa.html}</div>
-        <button type="button" class="btn btn-outline no-print" id="pdf">Baixar em PDF</button>
-      </div>
-    </section>
-    <section class="secao escuro">
-      <div class="wrap stack">
-        <h2>Quer entender esse resultado e montar o <span class="destaque">plano de correção</span>?</h2>
-        <p style="color:#e3e9e9">Diagnóstico gratuito em reunião, partindo dos números que você informou.</p>
-        <a class="btn btn-full" href="${esc(RU_CONFIG.agendaUrl(clinica || RUApp.lerLocal("ru_clinica") || "", r.naoMede ? RU.NAO_MEDE.nome : etapa.nome))}" target="_blank" rel="noopener">Agendar diagnóstico gratuito</a>
+  const linhas = r.comparacoes.map((c) => {
+    if (c.valor === null) return `<div class="cmp"><div class="cmp-l"><span>${c.nome}</span><b>Não sabe</b></div><div class="trilho2"></div><small>Esse é um dos achados: vale começar a medir.</small></div>`;
+    const pior = (c.chave === "comparecimento" && r.etapa === "comparecimento") || (c.chave === "fechamento" && ["fechamento", "orcamento", "retorno"].includes(r.etapa));
+    const cls = c.chave === "comparecimento" ? "laranja" : c.chave === "fechamento" ? "ciano" : "escuro";
+    return `<div class="cmp">
+      <div class="cmp-l"><span>${c.nome}${pior && !r.naoMede && r.modo !== "top" ? " · maior diferença" : ""}</span><b>${RU.pct(c.valor)}</b></div>
+      <div class="trilho2"><i class="c-${cls}" style="--w:${Math.round(c.valor * 100)}%"></i>${c.media ? `<em class="m-media" style="left:${Math.round(c.media * 100)}%"></em>` : ""}${c.top ? `<em class="m-top" style="left:${Math.round(c.top * 100)}%"></em>` : ""}</div>
+      <small>${c.media ? `Média: ${RU.pct(c.media)}${c.top ? ` · melhores clínicas: ${RU.pct(c.top)}` : ""}` : "Sem referência confiável de mercado para essa etapa"}</small>
+    </div>`;
+  }).join("");
+  const comparacao = `
+    <section class="wrap bloco reveal">
+      <div class="cartao-borda">
+        <b>Cada etapa comparada à média</b>
+        ${linhas}
+        <div class="legenda"><span><i class="lg-media"></i>Média do mercado</span><span><i class="lg-top"></i>Melhores clínicas</span></div>
       </div>
     </section>`;
 
-  RUApp.ativarCopiar(main);
-  RUApp.revelar();
-  const pl = document.getElementById("baixar-planilha");
-  if (pl) pl.addEventListener("click", RUApp.baixarPlanilha);
-  document.getElementById("pdf").addEventListener("click", () => window.print());
+  const cruzamento = r.cruzamento ? `<section class="wrap bloco reveal"><div class="cartao-cinza"><span class="sobre">Um detalhe nos seus números</span><p>${esc(r.cruzamento)}</p></div></section>` : "";
 
-  const c = document.getElementById("contador");
-  if (c) {
-    const alvo = Number(c.dataset.alvo);
-    const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduz) c.textContent = alvo.toLocaleString("pt-BR");
-    else {
-      const t0 = performance.now();
-      const dur = 1400;
-      const passo = (t) => {
-        const f = Math.min(1, (t - t0) / dur);
-        c.textContent = Math.round(alvo * (1 - Math.pow(1 - f, 3))).toLocaleString("pt-BR");
-        if (f < 1) requestAnimationFrame(passo);
-      };
-      requestAnimationFrame(passo);
+  const alertas = r.alertas.length ? `
+    <section class="wrap bloco">
+      <h2>Pontos de atenção</h2>
+      <div class="stack" style="gap:10px">${r.alertas.map((x, i) => `<div class="ponto reveal" style="transition-delay:${i * 0.12}s"><span>${i + 1}</span><div><b>${esc(x[0])}</b><p>${esc(x[1])}</p></div></div>`).join("")}</div>
+    </section>` : "";
+
+  // 4. O que fazer esta semana
+  const sem = r.semana;
+  const chat = sem.chat ? `
+    <div class="wa2">
+      <div class="wa2-topo"><span class="av">A</span><div><b>Ana · paciente</b><small>online</small></div></div>
+      <div class="wa2-corpo">${sem.chat.map((m) => m[0] === "d"
+        ? `<span class="dia">${esc(m[1])}</span>`
+        : `<div class="m ${m[0]}"><span>${esc(m[1])}</span><small>${m[2]}${m[0] === "c" ? ' <svg viewBox="0 0 16 11" aria-hidden="true"><path d="M1 6l3 3 6-7M6 9l1 1 7-8"/></svg>' : ""}</small></div>`).join("")}
+      </div>
+    </div>` : `
+    <div class="tabela-semana">${["Contatos novos", "Agendaram", "Compareceram", "Fecharam"].map((t) => `<div><span>${t}</span><b>__</b></div>`).join("")}</div>`;
+  const semana = `
+    <section class="secao cinza">
+      <div class="wrap stack reveal">
+        <div class="sobre">O que fazer esta semana</div>
+        <h2>${esc(sem.titulo)}</h2>
+        <p class="muted">${esc(sem.texto)}</p>
+        ${chat}
+        <button type="button" class="btn btn-outline" id="copiar-semana">Copiar a mensagem</button>
+        <p class="small muted">As mensagens completas das 6 etapas e o plano de 30 dias estão no relatório em PDF.</p>
+      </div>
+    </section>`;
+
+  const reuniao = `
+    <section class="wrap bloco reveal">
+      <h2>O que só os números da clínica mostram</h2>
+      <p class="muted">De fora, o diagnóstico vai até aqui. Na reunião, olhamos juntos:</p>
+      <ul class="checks"><li>Quanto existe em orçamentos parados</li><li>O comparecimento real na agenda</li><li>De onde vem o faturamento</li></ul>
+    </section>
+    <section class="wrap bloco reveal">
+      <div class="cartao-borda">
+        <span class="sobre">Caso real</span>
+        <div class="caso-nums"><div><small>Antes</small><b>R$ 55 mil</b><small>por mês, estagnada</small></div><div class="d"><small>3 meses depois</small><b>R$ 115 mil</b><small>e uma cadeira a mais</small></div></div>
+        <p class="muted">Clínica com 3 dentistas. Corrigimos a primeira resposta e o retorno dos orçamentos.</p>
+      </div>
+    </section>`;
+
+  const agenda = RU_CONFIG.agendaUrl(clinica, nomeEtapa);
+  const cta = `
+    <section class="secao escuro">
+      <div class="wrap stack">
+        <h2>Quer o plano para chegar <span class="destaque">à média e além</span>?</h2>
+        <p style="color:#e3e9e9">Reunião de 30 minutos, gratuita. Você sai com:</p>
+        <ul class="checks claro"><li>O plano de correção das 2 etapas mais fracas</li><li>Uma meta realista para os próximos 90 dias</li><li>A leitura dos números internos da clínica</li></ul>
+        <a class="btn btn-full" href="${esc(agenda)}" target="_blank" rel="noopener">Agendar a reunião</a>
+        <button type="button" class="btn btn-outline btn-full" id="pedir-relatorio">Receber o relatório completo no WhatsApp</button>
+        <p class="small" id="relatorio-status" style="color:#b9c4c4;text-align:center" role="status">O relatório em PDF chega em até 1 dia útil.</p>
+      </div>
+    </section>
+    <footer class="rodape"><div class="wrap stack" style="gap:4px">
+      <b style="color:var(--preto);font-weight:500">Fontes das referências</b>
+      <span>Fechamento: Henry Schein One, 2026 Catalyst Index (consultórios nos EUA).</span>
+      <span>Comparecimento: revisão científica sobre faltas em consultas de saúde (2018).</span>
+      <span>Tempo de resposta: Harvard Business Review (2011).</span>
+      <span>Estimativa calculada só com os dados informados por você. Não é promessa de resultado. · RiseUp Odonto</span>
+    </div></footer>`;
+
+  main.innerHTML = `
+    <section class="wrap topo-res entra">
+      <div class="sobre">Mini diagnóstico${clinica ? " · " + esc(clinica) : ""}</div>
+      <h1>${titulo}</h1>
+      <p class="muted">${esc(r.abertura)}</p>
+    </section>
+    <section class="wrap">${painel}</section>
+    ${funil}${comparacao}${cruzamento}${alertas}${semana}${reuniao}${cta}`;
+
+  RUApp.revelar();
+
+  // Números que contam ao aparecer
+  const contar = (el) => {
+    const alvo = Number(el.dataset.alvo);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t0 = performance.now();
+    const passo = (t) => {
+      const f = Math.min(1, (t - t0) / 1400);
+      el.textContent = Math.round(alvo * (1 - Math.pow(1 - f, 3))).toLocaleString("pt-BR");
+      if (f < 1) requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  };
+  document.querySelectorAll(".contar").forEach(contar);
+
+  document.getElementById("copiar-semana").addEventListener("click", async (ev) => {
+    try { await navigator.clipboard.writeText(sem.copiar); } catch (e) {}
+    ev.target.textContent = "Mensagem copiada";
+    setTimeout(() => (ev.target.textContent = "Copiar a mensagem"), 1600);
+  });
+
+  const pedir = document.getElementById("pedir-relatorio");
+  const status = document.getElementById("relatorio-status");
+  pedir.addEventListener("click", async () => {
+    pedir.disabled = true;
+    let ok = false;
+    if (leadId) {
+      try {
+        const relatorio = new URL("/relatorio", location.origin);
+        ["r", "n", "f"].forEach((c) => { if (p.get(c)) relatorio.searchParams.set(c, p.get(c)); });
+        const resp = await fetch("/api/relatorio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead: leadId, relatorio: relatorio.toString() }) });
+        ok = resp.ok;
+      } catch (e) {}
     }
-  }
+    if (ok) {
+      pedir.textContent = "Pedido recebido";
+      status.textContent = "Pronto! O relatório completo chega no seu WhatsApp em até 1 dia útil.";
+    } else {
+      const t = `Olá! Fiz o diagnóstico${clinica ? " da " + clinica : ""} e quero receber o relatório completo.`;
+      window.open(`https://wa.me/${RU_CONFIG.whatsappAgenda}?text=${encodeURIComponent(t)}`, "_blank", "noopener");
+      pedir.disabled = false;
+    }
+  });
 })();
 </script>
 </body>
