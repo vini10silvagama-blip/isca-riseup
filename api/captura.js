@@ -1,7 +1,7 @@
 // Recebe a página de captura e grava o lead no Notion.
 // Se o link tiver o código do lead (?c=RU-27) ou o WhatsApp já existir, atualiza a linha.
 // Caso contrário, cria uma linha nova.
-import { notion, buscar, baseId, hoje, texto, titulo, selecao, data, lerCorpo } from "./_notion.js";
+import { notion, buscar, baseId, hoje, texto, titulo, selecao, data, lerCorpo, etapaRespondeu, somarObservacao } from "./_notion.js";
 
 const FAIXAS = ["Até R$ 30 mil", "R$ 30 a 50 mil", "R$ 50 a 70 mil", "R$ 70 a 100 mil", "R$ 100 a 150 mil", "R$ 150 a 300 mil", "Acima de R$ 300 mil"];
 const ORIGENS = ["Prospecção", "Instagram", "Anúncio"];
@@ -30,7 +30,6 @@ export default async function handler(req, res) {
     if (!pagina) pagina = await buscar({ property: "WhatsApp", url: { equals: whatsapp } });
 
     const comuns = {
-      Decisor: texto(nome),
       "E-mail": { email },
       "Faixa de faturamento": selecao(faixa),
       "Consentimento LGPD": { checkbox: true },
@@ -39,7 +38,11 @@ export default async function handler(req, res) {
     };
 
     if (pagina) {
-      const props = { ...comuns };
+      // Lead que já existe: o Decisor encontrado na prospecção não é trocado.
+      // Quem preencheu fica registrado nas Observações.
+      const props = { ...comuns, "Observações": somarObservacao(pagina, `Captura ${hoje()}: preenchido por ${nome}.`) };
+      const etapa = etapaRespondeu(pagina);
+      if (etapa) props.Etapa = etapa;
       if (!pagina.properties?.WhatsApp?.url) props.WhatsApp = { url: whatsapp };
       if (!pagina.properties?.Origem?.select) props.Origem = selecao(origem);
       await notion(`/pages/${pagina.id}`, "PATCH", { properties: props });
@@ -50,10 +53,11 @@ export default async function handler(req, res) {
       parent: { database_id: baseId() },
       properties: {
         ...comuns,
+        Decisor: texto(nome),
         "Clínica": titulo(clinica),
         WhatsApp: { url: whatsapp },
         Origem: selecao(origem),
-        Etapa: { status: { name: "Novo" } },
+        Etapa: { status: { name: "Respondeu" } },
       },
     });
     return res.status(200).json({ lead: nova.id });

@@ -121,7 +121,7 @@
       <div class="wrap stack">
         <h2>Quer entender esse resultado e montar o <span class="destaque">plano de correção</span>?</h2>
         <p style="color:#e3e9e9">Diagnóstico gratuito em reunião, partindo dos números que você informou.</p>
-        <a class="btn btn-full" href="${RU_CONFIG.agendaUrl}" target="_blank" rel="noopener">Agendar diagnóstico gratuito</a>
+        <a class="btn btn-full" href="${esc(RU_CONFIG.agendaUrl(clinica || RUApp.lerLocal("ru_clinica") || "", r.naoMede ? RU.NAO_MEDE.nome : etapa.nome))}" target="_blank" rel="noopener">Agendar diagnóstico gratuito</a>
       </div>
     </section>`;
 

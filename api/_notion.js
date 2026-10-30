@@ -46,6 +46,21 @@ export const titulo = (t) => ({ title: [{ text: { content: String(t).slice(0, 20
 export const selecao = (t) => ({ select: { name: t } });
 export const data = (d) => ({ date: { start: d } });
 
+// Etapas que mudam para "Respondeu" quando o lead faz a captura ou o quiz.
+// Reunião marcada, Proposta e Fechado ficam como estão.
+const ETAPAS_QUE_AVANCAM = ["Novo", "Toque 1", "Toque 2", "Toque 3", "Toque 4", "Toque 5", "Reciclar em 90 dias", "Perdido"];
+
+export function etapaRespondeu(pagina) {
+  const atual = pagina?.properties?.Etapa?.status?.name || "Novo";
+  return ETAPAS_QUE_AVANCAM.includes(atual) ? { status: { name: "Respondeu" } } : null;
+}
+
+// Junta um texto novo às Observações que já existem, sem apagar nada.
+export function somarObservacao(pagina, linha) {
+  const atual = (pagina?.properties?.["Observações"]?.rich_text || []).map((t) => t.plain_text || "").join("");
+  return texto(atual ? `${atual}\n${linha}` : linha);
+}
+
 export function lerCorpo(req) {
   if (req.body && typeof req.body === "object") return req.body;
   try { return JSON.parse(req.body || "{}"); } catch (e) { return {}; }
