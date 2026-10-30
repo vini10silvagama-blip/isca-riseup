@@ -100,6 +100,17 @@
     else zap.value = d;
   });
 
+  // Lead da prospecção abriu o link: registra a data no CRM (uma vez por dia neste aparelho).
+  const codigoLink = (p.get("c") || "").trim();
+  if (codigoLink) {
+    const chave = "ru_visita_" + codigoLink;
+    const dia = new Date().toLocaleDateString("pt-BR");
+    if (RUApp.lerLocal(chave) !== dia) {
+      RUApp.gravarLocal(chave, dia);
+      fetch("/api/visita", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ codigo: codigoLink }), keepalive: true }).catch(() => {});
+    }
+  }
+
   function origem() {
     if (p.get("c")) return "Prospecção";
     if ((p.get("o") || "").toLowerCase() === "anuncio") return "Anúncio";
@@ -136,7 +147,9 @@
     }
     RUApp.gravarLocal("ru_nome", dados.nome);
     RUApp.gravarLocal("ru_clinica", dados.clinica);
-    if (leadId) RUApp.gravarLocal("ru_lead", leadId);
+    // Se a gravação falhou, os dados ficam guardados neste aparelho e o quiz tenta de novo.
+    if (leadId) { RUApp.gravarLocal("ru_lead", leadId); RUApp.gravarLocal("ru_pendente", ""); }
+    else RUApp.gravarLocal("ru_pendente", JSON.stringify(dados));
     const destino = p.get("next") === "quiz" ? "/quiz" : "/guia";
     location.href = destino + (leadId ? "?l=" + encodeURIComponent(leadId) : "");
   });

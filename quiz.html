@@ -21,7 +21,7 @@
 <script src="/assets/app.js"></script>
 <script>
 (function () {
-  const leadId = RUApp.lead();
+  let leadId = RUApp.lead();
   // Só manda para a captura quem nunca passou por ela neste aparelho.
   if (!leadId && !RUApp.lerLocal("ru_nome")) { location.replace("/?next=quiz"); return; }
   document.getElementById("voltar-guia").href = RUApp.linkComLead("/guia");
@@ -96,6 +96,18 @@
     const url = new URL("/resultado", location.origin);
     url.searchParams.set("r", codigo);
     if (clinica) url.searchParams.set("n", clinica);
+
+    // A captura não foi gravada antes: tenta de novo com os dados guardados no aparelho.
+    if (!leadId) {
+      const pendente = RUApp.lerLocal("ru_pendente");
+      if (pendente) {
+        try {
+          const rc = await fetch("/api/captura", { method: "POST", headers: { "Content-Type": "application/json" }, body: pendente });
+          if (rc.ok) leadId = (await rc.json()).lead || "";
+        } catch (err) {}
+        if (leadId) { RUApp.gravarLocal("ru_lead", leadId); RUApp.gravarLocal("ru_pendente", ""); }
+      }
+    }
 
     const envio = !leadId ? Promise.resolve() : fetch("/api/quiz", {
       method: "POST",

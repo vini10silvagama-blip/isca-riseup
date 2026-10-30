@@ -7,7 +7,7 @@ Os leads são gravados na base "Prospecção - Rise Up" do Notion.
 
 | Endereço | O que é |
 |---|---|
-| `/` | Página de captura. Aceita `?c=RU-27` (código do lead da prospecção) e `?o=anuncio` (origem anúncio). Sem nenhum dos dois, a origem é Instagram. |
+| `/` | Página de captura. Aceita `?c=RU-27` (código do lead da prospecção) e `?o=anuncio` (origem anúncio). Sem nenhum dos dois, a origem é Instagram. Com o código, grava a data em "Abriu o link" no CRM. |
 | `/guia` | Guia das 6 etapas |
 | `/quiz` | Quiz de 8 perguntas. Sem cadastro, manda para a captura e volta para o quiz. |
 | `/resultado?r=...` | Mini diagnóstico. O resultado é calculado a partir das respostas no próprio link. |
@@ -26,3 +26,8 @@ A base precisa estar conectada à integração (no Notion: ··· > Conexões).
 - Link do botão "Agendar diagnóstico gratuito": `assets/config.js`
 - Perguntas, regra de cálculo, textos do resultado e ferramentas: `assets/calc.js`
 - Cores e visual: `assets/style.css`
+
+## Avisos e segurança dos dados
+
+- Cada captura e cada quiz deixam um comentário na linha do lead mencionando o Vinicius (notificação do Notion). A integração precisa da permissão "Insert comments". Para avisar outra pessoa, defina `NOTION_AVISAR_USUARIO` na Vercel.
+- Se a captura não for gravada, os dados ficam no aparelho e o quiz tenta gravar de novo antes de enviar o resultado.
