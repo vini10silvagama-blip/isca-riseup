@@ -46,6 +46,26 @@ export const titulo = (t) => ({ title: [{ text: { content: String(t).slice(0, 20
 export const selecao = (t) => ({ select: { name: t } });
 export const data = (d) => ({ date: { start: d } });
 
+// Aviso no Notion: um comentário na linha do lead mencionando o Vinicius,
+// o que dispara a notificação do Notion (app e e-mail, conforme as configurações dele).
+// Para trocar a pessoa avisada, defina NOTION_AVISAR_USUARIO na Vercel.
+// Se o comentário falhar, a captura e o quiz seguem normalmente.
+const USUARIO_AVISADO = process.env.NOTION_AVISAR_USUARIO || "10cd74c4-690b-42e5-b20f-eadc4a102cef";
+
+export async function avisar(paginaId, mensagem) {
+  try {
+    await notion("/comments", "POST", {
+      parent: { page_id: paginaId },
+      rich_text: [
+        { type: "mention", mention: { user: { id: USUARIO_AVISADO } } },
+        { type: "text", text: { content: ` ${mensagem}`.slice(0, 1900) } },
+      ],
+    });
+  } catch (e) {
+    console.error("Aviso não enviado:", e.message);
+  }
+}
+
 // Etapas que mudam para "Respondeu" quando o lead faz a captura ou o quiz.
 // Reunião marcada, Proposta e Fechado ficam como estão.
 const ETAPAS_QUE_AVANCAM = ["Novo", "Toque 1", "Toque 2", "Toque 3", "Toque 4", "Toque 5", "Reciclar em 90 dias", "Perdido"];

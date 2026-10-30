@@ -1,7 +1,7 @@
 // Recebe a página de captura e grava o lead no Notion.
 // Se o link tiver o código do lead (?c=RU-27) ou o WhatsApp já existir, atualiza a linha.
 // Caso contrário, cria uma linha nova.
-import { notion, buscar, baseId, hoje, texto, titulo, selecao, data, lerCorpo, etapaRespondeu, somarObservacao } from "./_notion.js";
+import { notion, buscar, baseId, hoje, texto, titulo, selecao, data, lerCorpo, etapaRespondeu, somarObservacao, avisar } from "./_notion.js";
 
 const FAIXAS = ["Até R$ 30 mil", "R$ 30 a 50 mil", "R$ 50 a 70 mil", "R$ 70 a 100 mil", "R$ 100 a 150 mil", "R$ 150 a 300 mil", "Acima de R$ 300 mil"];
 const ORIGENS = ["Prospecção", "Instagram", "Anúncio"];
@@ -46,6 +46,7 @@ export default async function handler(req, res) {
       if (!pagina.properties?.WhatsApp?.url) props.WhatsApp = { url: whatsapp };
       if (!pagina.properties?.Origem?.select) props.Origem = selecao(origem);
       await notion(`/pages/${pagina.id}`, "PATCH", { properties: props });
+      await avisar(pagina.id, `Nova captura: ${nome} (${clinica}) preencheu a página do guia. Enviar o PDF por WhatsApp ou e-mail: ${whatsapp} · ${email}`);
       return res.status(200).json({ lead: pagina.id });
     }
 
@@ -60,6 +61,7 @@ export default async function handler(req, res) {
         Etapa: { status: { name: "Respondeu" } },
       },
     });
+    await avisar(nova.id, `Lead novo pela captura (${origem}): ${nome} (${clinica}). Enviar o PDF por WhatsApp ou e-mail: ${whatsapp} · ${email}`);
     return res.status(200).json({ lead: nova.id });
   } catch (e) {
     console.error(e);

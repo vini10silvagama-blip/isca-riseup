@@ -1,5 +1,5 @@
 // Recebe o resultado do quiz e atualiza a linha do lead no Notion.
-import { notion, baseId, hoje, texto, selecao, data, lerCorpo, etapaRespondeu } from "./_notion.js";
+import { notion, baseId, hoje, texto, selecao, data, lerCorpo, etapaRespondeu, avisar } from "./_notion.js";
 
 const ETAPAS = ["Primeira resposta", "Agendamento", "Comparecimento", "Orçamento", "Fechamento", "Retorno", "Não mede o funil"];
 
@@ -30,6 +30,9 @@ export default async function handler(req, res) {
     if (etapa) props.Etapa = etapa;
 
     await notion(`/pages/${lead}`, "PATCH", { properties: props });
+    const valor = props["Estimativa mensal"].number;
+    const clinica = (pagina.properties?.["Clínica"]?.title || []).map((t) => t.plain_text || "").join("") || "Lead";
+    await avisar(lead, `Quiz feito: ${clinica}. Etapa mais fraca: ${b.etapa}${valor ? ` · estimativa de R$ ${valor.toLocaleString("pt-BR")} por mês` : ""}. Bom momento para chamar.`);
     return res.status(200).json({ ok: true });
   } catch (e) {
     console.error(e);
