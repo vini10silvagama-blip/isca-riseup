@@ -304,7 +304,7 @@
       { nome: "Primeira resposta", leitura: q6 === 4 ? "Não sabe o tempo da primeira resposta" : "Resposta " + QUESTOES[5].o[q6].toLowerCase(), s: q6 === 4 ? "nao" : q6 <= 1 ? "ok" : q6 === 2 ? "atencao" : "critico" },
       { nome: "Agendamento", leitura: A === null ? "Não sabe quantos agendam" : `${pct(A)} dos contatos agendam`, s: A === null ? "nao" : "sem" },
       { nome: "Comparecimento", leitura: P === null ? "Não sabe quantos comparecem" : `${pct(P)} comparecem · média 77%`, s: P === null ? "nao" : P >= mP ? "ok" : P >= 0.6 ? "atencao" : "critico" },
-      { nome: "Orçamento", leitura: q7 === 8 ? "Não sabe por que o paciente não fecha" : QUESTOES[6].o[q7], s: q7 === 8 ? "nao" : (q7 === 0 || q7 === 1) ? "atencao" : "ok" },
+      { nome: "Orçamento", leitura: q7 === 8 ? "Não sabe por que o paciente não fecha" : QUESTOES[6].o[q7], s: q7 === 8 ? "nao" : [0, 1, 2, 6].includes(q7) ? "atencao" : "ok" },
       { nome: "Fechamento", leitura: F === null ? "Não sabe quantos fecham" : `${pct(F)} fecham · média 42%`, s: F === null ? "nao" : F >= mF ? "ok" : F >= 0.3 ? "atencao" : "critico" },
       { nome: "Retorno", leitura: QUESTOES[7].o[q8], s: q8 === 5 ? "nao" : q8 <= 1 ? "critico" : q8 <= 3 ? "atencao" : "ok" },
     ].map((x) => ({ ...x, situacao: sit(x.s) }));

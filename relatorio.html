@@ -28,10 +28,11 @@ p { margin: 0; }
 .capa .sobre { color: #29d9d5; letter-spacing: .06em; }
 .capa h1 { font-size: 38pt; margin-top: 3mm; }
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4mm; }
-.cards div { border: 1px solid #333; border-radius: 5mm; padding: 5mm; display: flex; flex-direction: column; gap: 1.5mm; background: rgba(20,20,20,.75); }
+.cards div { border: 1px solid #333; border-radius: 5mm; padding: 5mm 4mm; min-width: 0; display: flex; flex-direction: column; gap: 1.5mm; background: rgba(20,20,20,.75); }
 .cards small { color: #b9c4c4; font-size: 9.5pt; }
-.cards b { font-family: "Poppins", sans-serif; font-weight: 500; font-size: 15pt; }
+.cards b { font-family: "Poppins", sans-serif; font-weight: 500; font-size: 13pt; white-space: nowrap; }
 .cards b.c { color: #29d9d5; }
+.rodape span:last-child { white-space: nowrap; }
 .rodape { margin-top: auto; display: flex; justify-content: space-between; gap: 6mm; font-size: 9pt; color: #4a5252; border-top: 1px solid #e3e9e9; padding-top: 3mm; }
 .capa .rodape { border-color: #333; color: #b9c4c4; }
 .tabela { border: 1px solid #e3e9e9; border-radius: 5mm; overflow: hidden; }
@@ -116,7 +117,7 @@ p { margin: 0; }
       <h1>Depois que o lead chega</h1>
       <span style="font-size:15pt;color:#e3e9e9">Preparado para <b style="font-weight:500;color:#fff">${esc(clinica)}</b></span>
     </div>
-    <div class="cards" style="margin-top:22mm;max-width:160mm;position:relative">
+    <div class="cards" style="margin-top:22mm;position:relative">
       <div><small>Etapa mais fraca</small><b>${esc(nomeEtapa)}</b></div>
       <div><small>${r.modo === "top" ? "Nível das melhores" : "Chegando à média"}</small><b class="c">${temGanho ? `+ R$ ${k(ganho)} mil/mês` : "Calcular na reunião"}</b></div>
       <div><small>Em um ano</small><b>${temGanho ? `+ R$ ${k(ganho * 12)} mil` : "—"}</b></div>
