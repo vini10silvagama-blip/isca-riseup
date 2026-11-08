@@ -1,8 +1,8 @@
 // Perguntas, referências de mercado, regra de cálculo e textos do mini diagnóstico e do relatório.
 (function () {
   // Referências usadas na comparação. Só entram números com fonte.
-  // Agendamento fica sem referência (não há fonte confiável).
   const REF = {
+    agendamento: { media: 0.57, top: 0.74, fonte: "Liine, Dentistry Marketing Benchmark Report 2024 (quase 50 mil contatos de clínicas nos EUA)" },
     comparecimento: { media: 0.77, fonte: "Revisão científica sobre faltas em consultas de saúde (2018): 23% de faltas" },
     fechamento: { media: 0.42, top: 0.75, fonte: "Henry Schein One, 2026 Catalyst Index (consultórios nos EUA)" },
     resposta: { fonte: "Harvard Business Review (2011)" },
@@ -197,7 +197,7 @@
     const faixa = opcoes && opcoes.faixa;
     const C = valor(a, 0), A = valor(a, 1), P = valor(a, 2), F = valor(a, 3), T = valor(a, 4);
     const q6 = a[5], q7 = a[6], q8 = a[7];
-    const mP = REF.comparecimento.media, mF = REF.fechamento.media, topF = REF.fechamento.top;
+    const mA = REF.agendamento.media, topA = REF.agendamento.top, mP = REF.comparecimento.media, mF = REF.fechamento.media, topF = REF.fechamento.top;
 
     const desconhecidas = [A, P, F].filter((x) => x === null).length;
     const estimadas = [];
@@ -206,12 +206,13 @@
     const Pc = P ?? mP, Fc = F ?? mF;
 
     // Faturamento dos contatos novos: hoje e chegando à média.
-    let hoje = null, naMedia = null, estimativa = null, ganhoComp = null, ganhoFech = null, modo = "media", ganhoTop = null;
+    let hoje = null, naMedia = null, estimativa = null, ganhoAg = null, ganhoComp = null, ganhoFech = null, modo = "media", ganhoTop = null;
     const temReais = C !== null && A !== null && T !== null;
     if (temReais) {
       hoje = C * A * Pc * Fc * T;
-      naMedia = C * A * Math.max(Pc, mP) * Math.max(Fc, mF) * T;
+      naMedia = C * Math.max(A, mA) * Math.max(Pc, mP) * Math.max(Fc, mF) * T;
       estimativa = Math.max(0, naMedia - hoje);
+      ganhoAg = Math.max(0, C * Math.max(A, mA) * Pc * Fc * T - hoje);
       ganhoComp = Math.max(0, C * A * Math.max(Pc, mP) * Fc * T - hoje);
       ganhoFech = Math.max(0, C * A * Pc * Math.max(Fc, mF) * T - hoje);
       if (estimativa < 1 && Fc < topF) {
@@ -223,6 +224,7 @@
     // Etapa mais fraca: a maior diferença em relação à média (comparecimento ou fechamento).
     let etapa;
     const gaps = [];
+    if (A !== null && A < mA) gaps.push(["agendamento", temReais ? ganhoAg : mA - A]);
     if (P !== null && P < mP) gaps.push(["comparecimento", temReais ? ganhoComp : mP - P]);
     if (F !== null && F < mF) gaps.push(["fechamento", temReais ? ganhoFech : mF - F]);
     const refinarFechamento = () => {
@@ -231,15 +233,14 @@
       return "fechamento";
     };
     // "Não sei" vira o achado principal quando faltam 2 taxas, ou quando falta 1 e não há diferença clara (5 pontos ou mais).
-    const gapForte = (P !== null && mP - P >= 0.05) || (F !== null && mF - F >= 0.05);
+    const gapForte = (A !== null && mA - A >= 0.05) || (P !== null && mP - P >= 0.05) || (F !== null && mF - F >= 0.05);
     const naoMede = desconhecidas >= 2 || (desconhecidas === 1 && !gapForte);
     if (naoMede) etapa = "naomede";
     else if (gaps.length) {
       const pior = gaps.sort((x, y) => y[1] - x[1])[0][0];
-      etapa = pior === "comparecimento" ? "comparecimento" : refinarFechamento();
+      etapa = pior === "fechamento" ? refinarFechamento() : (pior === "agendamento" && (q6 === 2 || q6 === 3) ? "primeira" : pior);
     } else if (q6 === 2 || q6 === 3) etapa = "primeira";
     else if (q8 === 0 || q8 === 1) etapa = "retorno";
-    else if (A !== null && A <= 0.2) etapa = "agendamento";
     else etapa = refinarFechamento();
 
     // Texto de abertura com os números da clínica.
@@ -250,6 +251,7 @@
       ? `Você não sabe ${faltando[0]}. Sem esse número, não dá para ver onde está a perda. Para a estimativa, usamos a média do mercado.`
       : NAO_MEDE.explicacao;
     else if (modo === "top") abertura = "Seu funil já está na média do mercado em comparecimento e fechamento. O próximo marco são as melhores clínicas, que fecham 75% dos orçamentos.";
+    else if ((etapa === "agendamento" || etapa === "primeira") && A !== null && A < mA) abertura = `De cada 100 contatos novos, cerca de ${Math.round(A * 100)} agendam avaliação. A média do mercado é 57, e as melhores clínicas chegam a 74. ${ETAPAS[etapa].explicacao}`;
     else if (etapa === "comparecimento") abertura = `De cada 100 pacientes que agendam, cerca de ${Math.round(P * 100)} aparecem. A média do mercado é 77. É a maior diferença entre o seu funil e a média.`;
     else if ((etapa === "fechamento" || etapa === "orcamento" || etapa === "retorno") && F !== null && F < mF) abertura = `De cada 100 orçamentos, cerca de ${Math.round(F * 100)} fecham. A média do mercado é 42, e as melhores clínicas chegam a 75. ${ETAPAS[etapa].explicacao}`;
     else abertura = ETAPAS[etapa].explicacao;
@@ -262,7 +264,7 @@
     ] : null;
 
     const comparacoes = [
-      { chave: "agendamento", nome: "Agendam", valor: A, media: null, top: null },
+      { chave: "agendamento", nome: "Agendam", valor: A, media: mA, top: topA },
       { chave: "comparecimento", nome: "Comparecem", valor: P, media: mP, top: null },
       { chave: "fechamento", nome: "Fecham", valor: F, media: mF, top: topF },
     ];
@@ -298,16 +300,50 @@
     ][q8];
     if (a8) alertas.push(a8);
 
-    // Situação das 6 etapas (relatório).
-    const sit = (t) => ({ ok: "Ok", atencao: "Atenção", critico: "Crítico", sem: "Sem referência", nao: "Não medido" })[t];
+    // Situação das 6 etapas, com o problema e a solução de cada uma.
+    const porTaxa = (v, m) => v === null ? "nao" : v >= m ? "ok" : v >= m - 0.15 ? "atencao" : "critico";
+    const rotulo = (s, v, m, top) => s === "ok" ? (v === undefined ? "Ok" : top && v >= top ? "Acima da média" : "Na média") : ({ atencao: "Atenção", critico: "Crítico", nao: "Não medido" })[s];
+    const sOrc = q7 === 8 ? "nao" : [0, 1, 2, 6].includes(q7) ? "atencao" : "ok";
+    const tOrc = { 0: ["O preço vira a principal objeção: o valor do plano não ficou claro antes.", "Retomar a queixa e mostrar o plano antes de falar o valor."], 1: ["O paciente sai da avaliação para comparar preço com outras clínicas.", "Mostrar o que o plano inclui antes de falar o valor."], 2: ["O paciente sai para pensar sem dizer o que falta para decidir.", "Perguntar o que falta para decidir antes de encerrar a avaliação."], 6: ["O paciente some depois de receber o orçamento.", "Combinar o próximo contato antes de o paciente sair da clínica."] }[q7]
+      || (sOrc === "nao" ? ["Sem saber por que o paciente não fecha, não dá para corrigir a objeção.", "Registrar o motivo de cada orçamento que não fecha."] : ["As respostas não indicam perda na apresentação do orçamento.", "Manter o plano antes do valor em toda avaliação."]);
+    const T6 = {
+      primeira: { ok: ["A primeira resposta chega rápido, o que segura o contato.", "Manter o mesmo tempo também à noite e no fim de semana."], atencao: ["Quem chama à noite costuma falar com outras clínicas antes da sua resposta.", "Responder em minutos, abrindo com uma pergunta."], critico: ["O contato esfria até a resposta chegar, e parte já fechou em outro lugar.", "Definir quem responde em cada horário e responder em até 1 hora."], nao: ["Sem medir o tempo de resposta, não dá para saber quantos contatos esfriam.", "Anotar por uma semana o horário do contato e o da primeira resposta."] },
+      agendamento: { ok: ["A maioria das conversas vira avaliação marcada.", "Retomar em até 24 horas quem não agendou."], atencao: ["Parte das conversas para no preço e não vira avaliação.", "Responder o preço sempre com 2 horários de avaliação."], critico: ["A maioria dos contatos não agenda: o preço entra antes do motivo para vir.", "Explicar a avaliação e oferecer 2 horários em toda conversa."], nao: ["Sem saber quantos agendam, não dá para ver se a perda está na conversa.", "Registrar todo contato novo e se ele agendou."] },
+      comparecimento: { ok: ["Os agendados aparecem na média do mercado ou acima.", "Manter a confirmação na véspera em todo agendamento."], atencao: ["Parte dos agendados falta, e cada falta é um horário vazio.", "Confirmar na véspera, pedindo resposta 1 ou 2."], critico: ["Muitos agendados não aparecem, e cada falta é um horário perdido.", "Confirmar na véspera e remarcar no mesmo dia quem faltou."], nao: ["Sem medir as faltas, os horários vazios passam despercebidos.", "Anotar por uma semana quem agendou e quem compareceu."] },
+      fechamento: { ok: ["O fechamento está na média do mercado ou acima.", "Ter condições de pagamento prontas para os tratamentos maiores."], atencao: ["Parte dos orçamentos fica no \u201cvou pensar\u201d e esfria em casa.", "Perguntar o que falta para decidir antes de encerrar."], critico: ["A maioria dos orçamentos não fecha, e a decisão fica com o paciente.", "Usar o script do \u201cvou pensar\u201d em toda avaliação."], nao: ["É o número que mais pesa no faturamento, e hoje não é medido.", "Registrar quantos orçamentos são apresentados e quantos fecham."] },
+      retorno: { ok: ["Os orçamentos têm rotina de retorno, com datas.", "Registrar o motivo de cada orçamento perdido."], atencao: ["As tentativas são poucas ou sem data, e muitos orçamentos esfriam.", "Rotina de 3 retornos, com datas e um motivo novo a cada mensagem."], critico: ["Quem não fecha na hora raramente volta sozinho, e ninguém retoma.", "Mandar uma mensagem 2 dias depois para todo orçamento em aberto."], nao: ["Sem saber o que acontece com os orçamentos, eles ficam parados.", "Listar os orçamentos dos últimos 90 dias e retomar um por um."] },
+    };
+    const s1 = q6 === 4 ? "nao" : q6 <= 1 ? "ok" : q6 === 2 ? "atencao" : "critico";
+    const sA = porTaxa(A, mA), sP = porTaxa(P, mP), sF = porTaxa(F, mF), sR = q8 === 5 ? "nao" : q8 <= 1 ? "critico" : q8 <= 3 ? "atencao" : "ok";
     const status = [
-      { nome: "Primeira resposta", leitura: q6 === 4 ? "Não sabe o tempo da primeira resposta" : "Resposta " + QUESTOES[5].o[q6].toLowerCase(), s: q6 === 4 ? "nao" : q6 <= 1 ? "ok" : q6 === 2 ? "atencao" : "critico" },
-      { nome: "Agendamento", leitura: A === null ? "Não sabe quantos agendam" : `${pct(A)} dos contatos agendam`, s: A === null ? "nao" : "sem" },
-      { nome: "Comparecimento", leitura: P === null ? "Não sabe quantos comparecem" : `${pct(P)} comparecem · média 77%`, s: P === null ? "nao" : P >= mP ? "ok" : P >= 0.6 ? "atencao" : "critico" },
-      { nome: "Orçamento", leitura: q7 === 8 ? "Não sabe por que o paciente não fecha" : QUESTOES[6].o[q7], s: q7 === 8 ? "nao" : [0, 1, 2, 6].includes(q7) ? "atencao" : "ok" },
-      { nome: "Fechamento", leitura: F === null ? "Não sabe quantos fecham" : `${pct(F)} fecham · média 42%`, s: F === null ? "nao" : F >= mF ? "ok" : F >= 0.3 ? "atencao" : "critico" },
-      { nome: "Retorno", leitura: QUESTOES[7].o[q8], s: q8 === 5 ? "nao" : q8 <= 1 ? "critico" : q8 <= 3 ? "atencao" : "ok" },
-    ].map((x) => ({ ...x, situacao: sit(x.s) }));
+      { chave: "primeira", nome: "Primeira resposta", leitura: q6 === 4 ? "Não sabe o tempo da primeira resposta" : "Resposta " + QUESTOES[5].o[q6].toLowerCase(), s: s1, situacao: rotulo(s1), problema: T6.primeira[s1][0], fazer: T6.primeira[s1][1] },
+      { chave: "agendamento", nome: "Agendamento", leitura: A === null ? "Não sabe quantos agendam" : `${pct(A)} dos contatos agendam`, valor: A, media: mA, top: topA, s: sA, situacao: rotulo(sA, A, mA, topA), problema: T6.agendamento[sA][0], fazer: T6.agendamento[sA][1] },
+      { chave: "comparecimento", nome: "Comparecimento", leitura: P === null ? "Não sabe quantos comparecem" : `${pct(P)} comparecem`, valor: P, media: mP, s: sP, situacao: rotulo(sP, P, mP), problema: T6.comparecimento[sP][0], fazer: T6.comparecimento[sP][1] },
+      { chave: "orcamento", nome: "Orçamento", leitura: q7 === 8 ? "Não sabe por que o paciente não fecha" : QUESTOES[6].o[q7], s: sOrc, situacao: rotulo(sOrc), problema: tOrc[0], fazer: tOrc[1] },
+      { chave: "fechamento", nome: "Fechamento", leitura: F === null ? "Não sabe quantos fecham" : `${pct(F)} fecham`, valor: F, media: mF, top: topF, s: sF, situacao: rotulo(sF, F, mF, topF), problema: T6.fechamento[sF][0], fazer: T6.fechamento[sF][1] },
+      { chave: "retorno", nome: "Retorno", leitura: QUESTOES[7].o[q8], s: sR, situacao: rotulo(sR), problema: T6.retorno[sR][0], fazer: T6.retorno[sR][1] },
+    ];
+
+    // Nota do funil (0 a 100): média dos pontos de cada etapa.
+    const PTS = { ok: 100, atencao: 60, critico: 25, nao: 40 };
+    const nota = Math.round(status.reduce((t, x) => t + PTS[x.s], 0) / status.length);
+    const conta = (k) => status.filter((x) => x.s === k).length;
+    const contagem = { critico: conta("critico"), atencao: conta("atencao"), ok: conta("ok"), nao: conta("nao") };
+    const partes = [];
+    if (contagem.critico) partes.push(`${contagem.critico} ${contagem.critico > 1 ? "etapas críticas" : "etapa crítica"}`);
+    if (contagem.atencao) partes.push(`${contagem.atencao} em atenção`);
+    if (contagem.nao) partes.push(`${contagem.nao} sem medição`);
+    if (contagem.ok) partes.push(`${contagem.ok} ok`);
+    const notaTexto = partes.length > 1 ? partes.slice(0, -1).join(", ") + " e " + partes[partes.length - 1] + "." : (partes[0] || "") + ".";
+
+    // Números da etapa mais fraca (quantos se perdem por mês e quanto custa).
+    let detalhe = null;
+    if (temReais) {
+      if (etapa === "comparecimento" && P !== null) detalhe = { rotulo: "Faltas por mês", n: Math.round(C * A * (1 - P)), custoRot: "Custo das faltas", custo: ganhoComp, taxa: P, media: mP };
+      else if (etapa === "agendamento" || (etapa === "primeira" && A !== null && A < mA)) detalhe = { rotulo: "Contatos que não agendam", n: Math.round(C * (1 - A)), custoRot: "Chegando à média no agendamento", custo: ganhoAg, taxa: A, media: mA };
+      else if (["fechamento", "orcamento", "retorno"].includes(etapa) && F !== null) detalhe = { rotulo: "Orçamentos que não fecham por mês", n: Math.round(C * A * Pc * (1 - F)), custoRot: "Chegando à média no fechamento", custo: ganhoFech, taxa: F, media: mF };
+      if (detalhe && detalhe.custo < 500) detalhe.custo = null;
+    }
 
     const info = etapa === "naomede" ? NAO_MEDE : ETAPAS[etapa];
     return {
@@ -318,7 +354,7 @@
       abertura,
       estimativa: modo === "top" ? null : estimativa,
       estimativaTexto: estimativa !== null && modo !== "top" ? texto(estimativa) : null,
-      modo, ganhoTop, hoje, naMedia, ganhoComp, ganhoFech,
+      modo, ganhoTop, hoje, naMedia, ganhoAg, ganhoComp, ganhoFech, nota, notaTexto, contagem, detalhe,
       aumento: hoje && naMedia ? naMedia / hoje - 1 : null,
       faturamento: hoje,
       estimadas, funil, comparacoes, cruzamento, status,

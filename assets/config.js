@@ -5,7 +5,7 @@ window.RU_CONFIG = {
 
   // Mensagem que o lead envia ao clicar em "Agendar diagnóstico gratuito".
   // [clinica] e [etapa] são trocados pelo nome da clínica e pela etapa mais fraca.
-  mensagemAgenda: "Olá! Fiz o diagnóstico da [clinica]. Etapa mais fraca: [etapa]. Quero agendar a reunião para entender o resultado.",
+  mensagemAgenda: "Olá! Fiz o diagnóstico da [clinica]. Etapa mais fraca: [etapa]. Quero aprofundar o diagnóstico na reunião.",
 
   // Monta o link do botão. Sem o nome da clínica, a mensagem fica sem ele.
   agendaUrl(clinica, etapa) {

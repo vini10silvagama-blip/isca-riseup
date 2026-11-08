@@ -42,27 +42,50 @@
   const k = (v) => Math.round(v / 1000);
   const nomeEtapa = r.naoMede ? "Não mede o funil" : r.etapaNome;
 
-  // 1. Abertura
-  const titulo = r.naoMede
-    ? `Sua clínica <span class="destaque">não mede o funil</span>`
-    : r.modo === "top"
-      ? `Seu funil já está <span class="destaque">na média</span>`
-      : `Sua etapa mais fraca é <span class="destaque">${esc(r.etapaNome.toLowerCase())}</span>`;
+  const fmt = (v) => k(v).toLocaleString("pt-BR");
+  const ICO = {
+    cadeado: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  };
 
-  // 2. Painel com o anel
+  // 1. Abertura
+  const abertura = `
+    <section class="wrap topo-res entra">
+      <div class="sobre">Mini diagnóstico</div>
+      <h1>${clinica ? `Diagnóstico da <span class="destaque">${esc(clinica)}</span>` : `Seu <span class="destaque">diagnóstico</span>`}</h1>
+    </section>`;
+
+  // 2. Nota do funil
+  const arco = Math.round(251 * r.nota / 100);
+  const chipsNota = [["critico", "Crítico"], ["atencao", "Atenção"], ["ok", "Ok"], ["nao", "Não medido"]]
+    .filter(([c]) => r.contagem[c]).map(([c, t]) => `<span class="sit s-${c}">${t} · ${r.contagem[c]}</span>`).join("");
+  const nota = `
+    <section class="wrap">
+      <div class="nota-card reveal">
+        <span class="brilho" aria-hidden="true"></span>
+        <span class="p-rot c">NOTA DO FUNIL</span>
+        <svg class="medidor" viewBox="0 0 200 118" role="img" aria-label="Nota do funil: ${r.nota} de 100">
+          <path d="M 20 100 A 80 80 0 0 1 180 100" class="med-fundo"></path>
+          <path d="M 20 100 A 80 80 0 0 1 180 100" class="med-arco" style="--d:${arco}"></path>
+          <text x="100" y="88" text-anchor="middle" class="med-num">${r.nota}</text>
+          <text x="100" y="110" text-anchor="middle" class="med-leg">de 100</text>
+        </svg>
+        <p>${esc(r.notaTexto.charAt(0).toUpperCase() + r.notaTexto.slice(1))}</p>
+        <div class="sits">${chipsNota}</div>
+      </div>
+    </section>`;
+
+  // 3. Quanto está na mesa
   let painel;
-  if (r.hoje !== null && (r.modo === "top" ? r.ganhoTop > 0 : r.estimativa > 0)) {
-    const ganho = r.modo === "top" ? r.ganhoTop : r.estimativa;
+  const ganho = r.modo === "top" ? r.ganhoTop : r.estimativa;
+  if (r.hoje !== null && ganho > 0) {
     const aumento = ganho / r.hoje;
     const offset = Math.round(302 * (1 - Math.min(aumento, 1)));
-    const quebra = r.modo === "top" ? "" : `
-      <div class="p-quebra">
-        ${r.ganhoComp > 500 ? `<div><span>Só o comparecimento</span><b>+ R$ ${k(r.ganhoComp).toLocaleString("pt-BR")} mil/mês</b></div>` : ""}
-        ${r.ganhoFech > 500 ? `<div><span>Só o fechamento</span><b>+ R$ ${k(r.ganhoFech).toLocaleString("pt-BR")} mil/mês</b></div>` : ""}
-      </div>`;
+    const quebra = r.modo === "top" ? "" : [["Só o agendamento", r.ganhoAg], ["Só o comparecimento", r.ganhoComp], ["Só o fechamento", r.ganhoFech]]
+      .filter((x) => x[1] > 500).map((x) => `<div><span>${x[0]}</span><b>+ R$ ${fmt(x[1])} mil/mês</b></div>`).join("");
     painel = `
       <div class="painel reveal">
-        <span class="p-rot">${r.modo === "top" ? "CHEGANDO AO NÍVEL DAS MELHORES CLÍNICAS NO FECHAMENTO" : "CHEGANDO À MÉDIA DO MERCADO"}</span>
+        <span class="brilho" aria-hidden="true"></span>
+        <span class="p-rot c">${r.modo === "top" ? "CHEGANDO AO NÍVEL DAS MELHORES CLÍNICAS NO FECHAMENTO" : "CHEGANDO À MÉDIA DO MERCADO"}</span>
         <div class="p-linha">
           <svg class="anel" viewBox="0 0 110 110" role="img" aria-label="Faturamento ${Math.round(aumento * 100)}% maior">
             <circle cx="55" cy="55" r="48" class="anel-fundo"></circle>
@@ -71,64 +94,54 @@
             <text x="55" y="71" text-anchor="middle" class="anel-leg">faturamento</text>
           </svg>
           <div class="p-nums">
-            <b class="p-mes">+R$ <span class="contar" data-alvo="${k(ganho)}">${k(ganho).toLocaleString("pt-BR")}</span> mil</b>
+            <b class="p-mes">+R$ <span class="contar" data-alvo="${k(ganho)}">${fmt(ganho)}</span> mil</b>
             <small>por mês</small>
-            <b class="p-ano">R$ <span class="contar" data-alvo="${k(ganho * 12)}">${k(ganho * 12).toLocaleString("pt-BR")}</span> mil por ano</b>
+            <b class="p-ano">R$ <span class="contar" data-alvo="${k(ganho * 12)}">${fmt(ganho * 12)}</span> mil por ano</b>
           </div>
         </div>
-        <div class="p-base"><span>Hoje: R$ ${k(r.hoje).toLocaleString("pt-BR")} mil/mês</span><span>${r.modo === "top" ? "No nível das melhores" : "Na média"}: R$ ${k(r.hoje + ganho).toLocaleString("pt-BR")} mil/mês</span></div>
-        ${quebra}
-        <small class="p-nota">Calculado só com os números que você informou${r.estimadas.length ? `; ${r.estimadas.join(" e ").toLowerCase()} estimado${r.estimadas.length > 1 ? "s" : ""} pela média do mercado` : ""}. ${r.modo === "top" ? "" : "Comparamos com a média, não com as melhores clínicas. "}Não é promessa de resultado.</small>
+        <div class="p-tiles"><div><small>Hoje</small><b>R$ ${fmt(r.hoje)} mil/mês</b></div><div><small>${r.modo === "top" ? "No nível das melhores" : "Na média"}</small><b class="c">R$ ${fmt(r.hoje + ganho)} mil/mês</b></div></div>
+        ${quebra ? `<div class="p-quebra">${quebra}</div>` : ""}
+        <small class="p-nota">Calculado só com os números que você informou${r.estimadas.length ? `; ${r.estimadas.join(" e ").toLowerCase()} estimado${r.estimadas.length > 1 ? "s" : ""} pela média do mercado` : ""}. Não é promessa de resultado.</small>
       </div>`;
+  } else if (r.hoje !== null) {
+    painel = `<div class="painel reveal"><span class="brilho" aria-hidden="true"></span><span class="p-rot c">ESTIMATIVA EM REAIS</span><p style="color:#e3e9e9">Nas taxas que você informou, o funil já está na média do mercado ou acima. O ganho agora está nos detalhes de cada etapa, que só aparecem com os números internos da clínica.</p></div>`;
   } else {
-    painel = `<div class="painel reveal"><span class="p-rot">ESTIMATIVA EM REAIS</span><p style="color:#e3e9e9">Para calcular em reais, é preciso responder o volume de contatos, quantos agendam e o valor médio do tratamento. Na reunião, fazemos essa conta com os números da clínica.</p></div>`;
+    painel = `<div class="painel reveal"><span class="brilho" aria-hidden="true"></span><span class="p-rot c">ESTIMATIVA EM REAIS</span><p style="color:#e3e9e9">Para calcular em reais, é preciso responder o volume de contatos, quantos agendam e o valor médio do tratamento. Na reunião, fazemos essa conta com os números da clínica.</p></div>`;
   }
+  const mesa = `
+    <section class="wrap bloco">
+      <h2>Quanto está na mesa</h2>
+      ${painel}
+      ${r.cruzamento ? `<div class="cartao-cinza reveal"><span class="sobre">Um detalhe nos seus números</span><p>${esc(r.cruzamento)}</p></div>` : ""}
+    </section>`;
 
-  // 3. Funil e comparação com a média
-  let funil = "";
-  if (r.funil) {
-    const max = r.funil[0].n || 1;
-    const cor = { 2: r.etapa === "comparecimento" ? "laranja" : "escuro", 3: ["fechamento", "orcamento", "retorno"].includes(r.etapa) ? "ciano" : "escuro" };
-    funil = `
-      <section class="wrap bloco reveal">
-        <div class="bloco-tit"><h2>Seu funil hoje</h2><span class="small muted">por mês</span></div>
-        <div class="colunas">${r.funil.map((f, i) => `
-          <div class="col"><b class="${cor[i] === "laranja" ? "t-laranja" : ""}">${f.n.toLocaleString("pt-BR")}</b><i class="c-${cor[i] || "escuro"}" style="--h:${Math.max(4, Math.round((f.n / max) * 100))}%;transition-delay:${i * 0.2}s"></i></div>`).join("")}
-        </div>
-        <div class="colunas-rot">${r.funil.map((f) => `<span>${f.rotulo}${f.estimado ? "*" : ""}</span>`).join("")}</div>
-        ${r.funil.some((f) => f.estimado) ? `<p class="small muted">* estimado com a média do mercado</p>` : ""}
-      </section>`;
-  }
-
-  const linhas = r.comparacoes.map((c) => {
-    if (c.valor === null) return `<div class="cmp"><div class="cmp-l"><span>${c.nome}</span><b>Não sabe</b></div><div class="trilho2"></div><small>Esse é um dos achados: vale começar a medir.</small></div>`;
-    const pior = (c.chave === "comparecimento" && r.etapa === "comparecimento") || (c.chave === "fechamento" && ["fechamento", "orcamento", "retorno"].includes(r.etapa));
-    const cls = c.chave === "comparecimento" ? "laranja" : c.chave === "fechamento" ? "ciano" : "escuro";
-    return `<div class="cmp">
-      <div class="cmp-l"><span>${c.nome}${pior && !r.naoMede && r.modo !== "top" ? " · maior diferença" : ""}</span><b>${RU.pct(c.valor)}</b></div>
-      <div class="trilho2"><i class="c-${cls}" style="--w:${Math.round(c.valor * 100)}%"></i>${c.media ? `<em class="m-media" style="left:${Math.round(c.media * 100)}%"></em>` : ""}${c.top ? `<em class="m-top" style="left:${Math.round(c.top * 100)}%"></em>` : ""}</div>
-      <small>${c.media ? `Média: ${RU.pct(c.media)}${c.top ? ` · melhores clínicas: ${RU.pct(c.top)}` : ""}` : "Sem referência confiável de mercado para essa etapa"}</small>
-    </div>`;
-  }).join("");
-  const comparacao = `
-    <section class="wrap bloco reveal">
-      <div class="cartao-borda">
-        <b>Cada etapa comparada à média</b>
-        ${linhas}
-        <div class="legenda"><span><i class="lg-media"></i>Média do mercado</span><span><i class="lg-top"></i>Melhores clínicas</span></div>
+  // 4. As 6 etapas
+  const fraca = { primeira: "primeira", agendamento: "agendamento", comparecimento: "comparecimento", orcamento: "orcamento", fechamento: "fechamento", retorno: "retorno" }[r.etapa];
+  const etapas = `
+    <section class="wrap bloco">
+      <h2>As 6 etapas da sua clínica</h2>
+      <div class="legenda"><span><i class="lg-media"></i>Média do mercado</span><span><i class="lg-top"></i>Melhores clínicas</span></div>
+      <div class="etapas6">${r.status.map((s, i) => `
+        <div class="e6 reveal${s.chave === fraca ? " fraca" : ""}" style="transition-delay:${(i % 2) * 0.08}s">
+          <div class="e6-topo"><span class="e6-n">${i + 1}</span><b>${s.nome}</b><span class="sit s-${s.s}">${s.situacao}</span></div>
+          <span class="e6-leitura">${esc(s.leitura)}${s.chave === fraca ? ' · <strong>sua etapa mais fraca</strong>' : ""}</span>
+          ${s.valor !== undefined && s.valor !== null ? `
+          <div class="trilho2"><i class="c-${s.s === "critico" ? "laranja" : "ciano"}" style="--w:${Math.round(s.valor * 100)}%"></i><em class="m-media" style="left:${Math.round(s.media * 100)}%"></em>${s.top ? `<em class="m-top" style="left:${Math.round(s.top * 100)}%"></em>` : ""}</div>
+          <small class="e6-ref">Média ${RU.pct(s.media)}${s.top ? ` · melhores ${RU.pct(s.top)}` : ""}</small>` : ""}
+          <p><b>O que acontece:</b> ${esc(s.problema)}</p>
+          <p><b class="t-ce">O que fazer:</b> ${esc(s.fazer)}</p>
+        </div>`).join("")}
       </div>
     </section>`;
 
-  const cruzamento = r.cruzamento ? `<section class="wrap bloco reveal"><div class="cartao-cinza"><span class="sobre">Um detalhe nos seus números</span><p>${esc(r.cruzamento)}</p></div></section>` : "";
-
-  const alertas = r.alertas.length ? `
-    <section class="wrap bloco">
-      <h2>Pontos de atenção</h2>
-      <div class="stack" style="gap:10px">${r.alertas.map((x, i) => `<div class="ponto reveal" style="transition-delay:${i * 0.12}s"><span>${i + 1}</span><div><b>${esc(x[0])}</b><p>${esc(x[1])}</p></div></div>`).join("")}</div>
-    </section>` : "";
-
-  // 4. O que fazer esta semana
+  // 5. Etapa mais fraca em detalhe
   const sem = r.semana;
+  const d = r.detalhe;
+  const kpis = d ? `
+    <div class="kpis">
+      <div><small>${d.rotulo}</small><b>${d.n.toLocaleString("pt-BR")}</b></div>
+      <div class="esc"><small>${d.custo ? d.custoRot : "Sua taxa · média"}</small><b>${d.custo ? `+R$ ${fmt(d.custo)} mil/mês` : `${RU.pct(d.taxa)} · ${RU.pct(d.media)}`}</b></div>
+    </div>` : "";
   const chat = sem.chat ? `
     <div class="wa2">
       <div class="wa2-topo"><span class="av">A</span><div><b>Ana · paciente</b><small>online</small></div></div>
@@ -138,60 +151,61 @@
       </div>
     </div>` : `
     <div class="tabela-semana">${["Contatos novos", "Agendaram", "Compareceram", "Fecharam"].map((t) => `<div><span>${t}</span><b>__</b></div>`).join("")}</div>`;
-  const semana = `
+  const detalhe = `
     <section class="secao cinza">
       <div class="wrap stack reveal">
-        <div class="sobre">O que fazer esta semana</div>
-        <h2>${esc(sem.titulo)}</h2>
-        <p class="muted">${esc(sem.texto)}</p>
-        ${chat}
-        <button type="button" class="btn btn-outline" id="copiar-semana">Copiar a mensagem</button>
-        <p class="small muted">Todas as mensagens desta etapa e o plano de 30 dias estão no relatório em PDF.</p>
+        <div class="sobre">${r.naoMede ? "O principal achado" : "Sua etapa mais fraca"}</div>
+        <h2>${esc(nomeEtapa)}</h2>
+        <p class="muted">${esc(r.abertura)}</p>
+        ${kpis}
+        <div class="semana-card">
+          <span class="sobre">O que fazer esta semana</span>
+          <b class="semana-tit">${esc(sem.titulo)}</b>
+          <p class="muted small">${esc(sem.texto)}</p>
+          ${chat}
+          <button type="button" class="btn btn-outline" id="copiar-semana">Copiar a mensagem</button>
+        </div>
       </div>
     </section>`;
 
-  const reuniao = `
-    <section class="wrap bloco reveal">
-      <h2>O que só os números da clínica mostram</h2>
-      <p class="muted">De fora, o diagnóstico vai até aqui. Na reunião, olhamos juntos:</p>
-      <ul class="checks"><li>Quanto existe em orçamentos parados</li><li>O comparecimento real na agenda</li><li>De onde vem o faturamento</li></ul>
-    </section>
-    <section class="wrap bloco reveal">
-      <div class="cartao-borda">
-        <span class="sobre">Caso real</span>
-        <div class="caso-nums"><div><small>Antes</small><b>R$ 55 mil</b><small>por mês, estagnada</small></div><div class="d"><small>3 meses depois</small><b>R$ 115 mil</b><small>e uma cadeira a mais</small></div></div>
-        <p class="muted">Clínica com 3 dentistas. Corrigimos a primeira resposta e o retorno dos orçamentos.</p>
+  // 6. O que só os números reais mostram
+  const trancados = [
+    ["Orçamentos parados", "Quantos existem hoje e quanto valem em tratamentos."],
+    ["Origem dos pacientes que fecham", "De onde vêm os contatos que viram tratamento e os que só custam."],
+    ["Custo de cada paciente novo", "Quanto a clínica investe para cada paciente que chega à cadeira."],
+  ];
+  const reais = `
+    <section class="wrap bloco fim">
+      <h2>O que só os números reais da clínica mostram</h2>
+      <p class="muted">O diagnóstico de fora vai até aqui. Estas respostas aparecem na reunião, com os dados da clínica.</p>
+      <div class="stack" style="gap:10px">${trancados.map((t, i) => `
+        <div class="tranca reveal" style="transition-delay:${i * 0.1}s"><span class="tranca-ico">${ICO.cadeado}</span><div><b>${t[0]}</b><p>${t[1]}</p><span class="borrao" aria-hidden="true"><i></i><i></i></span></div></div>`).join("")}
       </div>
     </section>`;
 
+  // 7. CTA
   const agenda = RU_CONFIG.agendaUrl(clinica, nomeEtapa);
   const cta = `
-    <section class="secao escuro">
+    <section class="secao escuro cta-final">
+      <span class="circ" aria-hidden="true"></span>
       <div class="wrap stack">
-        <h2>Quer o plano para chegar <span class="destaque">à média e além</span>?</h2>
-        <p style="color:#e3e9e9">Reunião de 30 minutos, gratuita. Você sai com:</p>
-        <ul class="checks claro"><li>O plano de correção das 2 etapas mais fracas</li><li>Uma meta realista para os próximos 90 dias</li><li>A leitura dos números internos da clínica</li></ul>
-        <a class="btn btn-full" href="${esc(agenda)}" target="_blank" rel="noopener">Agendar a reunião</a>
+        <h2>Vamos aprofundar o diagnóstico ${clinica ? `da <span class="destaque">${esc(clinica)}</span>` : `da <span class="destaque">sua clínica</span>`}?</h2>
+        <p style="color:#e3e9e9">Na reunião, analisamos com você cada etapa do atendimento da clínica, encontramos a causa de cada perda e, no final, apresentamos um caminho para corrigir.</p>
+        <a class="btn btn-full" href="${esc(agenda)}" target="_blank" rel="noopener">Quero aprofundar meu diagnóstico</a>
         <button type="button" class="btn btn-outline btn-full" id="pedir-relatorio">Receber o relatório completo no WhatsApp</button>
         <p class="small" id="relatorio-status" style="color:#b9c4c4;text-align:center" role="status">O relatório em PDF chega em até 1 dia útil.</p>
       </div>
     </section>
     <footer class="rodape"><div class="wrap stack" style="gap:4px">
       <b style="color:var(--preto);font-weight:500">Fontes das referências</b>
-      <span>Fechamento: Henry Schein One, 2026 Catalyst Index (consultórios nos EUA).</span>
+      <span>Agendamento: Liine, Dentistry Marketing Benchmark Report 2024 (quase 50 mil contatos de clínicas nos EUA).</span>
       <span>Comparecimento: revisão científica sobre faltas em consultas de saúde (2018).</span>
+      <span>Fechamento: Henry Schein One, 2026 Catalyst Index (consultórios nos EUA).</span>
       <span>Tempo de resposta: Harvard Business Review (2011).</span>
       <span>Estimativa calculada só com os dados informados por você. Não é promessa de resultado. · RiseUp Odonto</span>
     </div></footer>`;
 
-  main.innerHTML = `
-    <section class="wrap topo-res entra">
-      <div class="sobre">Mini diagnóstico${clinica ? " · " + esc(clinica) : ""}</div>
-      <h1>${titulo}</h1>
-      <p class="muted">${esc(r.abertura)}</p>
-    </section>
-    <section class="wrap">${painel}</section>
-    ${funil}${comparacao}${cruzamento}${alertas}${semana}${reuniao}${cta}`;
+  main.innerHTML = abertura + nota + mesa + etapas + detalhe + reais + cta;
 
   RUApp.revelar();
 
