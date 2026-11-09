@@ -1,5 +1,5 @@
 // Recebe o resultado do quiz e atualiza a linha do lead no Notion.
-import { notion, baseId, hoje, texto, selecao, data, lerCorpo, etapaRespondeu, avisar } from "./_notion.js";
+import { conta, hoje, texto, selecao, data, lerCorpo, etapaRespondeu } from "./_notion.js";
 
 const ETAPAS = ["Primeira resposta", "Agendamento", "Comparecimento", "Orçamento", "Fechamento", "Retorno", "Não mede o funil"];
 
@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   const b = lerCorpo(req);
 
   const lead = String(b.lead || "").replace(/-/g, "");
+  const { notion, baseId, avisar } = conta(b.v);
   if (!/^[0-9a-f]{32}$/i.test(lead) || !ETAPAS.includes(b.etapa)) return res.status(400).json({ erro: "Dados inválidos" });
 
   let resultado = String(b.resultado || "");

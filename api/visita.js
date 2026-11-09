@@ -1,11 +1,12 @@
 // Registra que o lead da prospecção abriu o link da captura (?c=RU-27).
 // Só grava a data em "Abriu o link"; não muda Etapa nem Próximo toque.
 // Quem já preencheu a captura não é atualizado (o registro já está na Data da captura).
-import { notion, buscar, hoje, data, lerCorpo } from "./_notion.js";
+import { conta, hoje, data, lerCorpo } from "./_notion.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ erro: "Método não permitido" });
   const b = lerCorpo(req);
+  const { notion, buscar } = conta(b.v);
   const numero = Number(String(b.codigo || "").replace(/\D/g, ""));
   if (!numero) return res.status(400).json({ erro: "Código inválido" });
 

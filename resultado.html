@@ -184,7 +184,8 @@
     </section>`;
 
   // 7. CTA
-  const agenda = RU_CONFIG.agendaUrl(clinica, nomeEtapa);
+  const vend = RUApp.vendedor();
+  const agenda = RU_CONFIG.agendaUrl(clinica, nomeEtapa, vend);
   const cta = `
     <section class="secao escuro cta-final">
       <span class="circ" aria-hidden="true"></span>
@@ -237,8 +238,8 @@
     if (leadId) {
       try {
         const relatorio = new URL("/relatorio", location.origin);
-        ["r", "n", "f"].forEach((c) => { if (p.get(c)) relatorio.searchParams.set(c, p.get(c)); });
-        const resp = await fetch("/api/relatorio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead: leadId, relatorio: relatorio.toString() }) });
+        ["r", "n", "f", "v"].forEach((c) => { if (p.get(c)) relatorio.searchParams.set(c, p.get(c)); });
+        const resp = await fetch("/api/relatorio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead: leadId, relatorio: relatorio.toString(), v: vend }) });
         ok = resp.ok;
       } catch (e) {}
     }
@@ -247,7 +248,7 @@
       status.textContent = "Pronto! O relatório completo chega no seu WhatsApp em até 1 dia útil.";
     } else {
       const t = `Olá! Fiz o diagnóstico${clinica ? " da " + clinica : ""} e quero receber o relatório completo.`;
-      window.open(`https://wa.me/${RU_CONFIG.whatsappAgenda}?text=${encodeURIComponent(t)}`, "_blank", "noopener");
+      window.open(`https://wa.me/${RU_CONFIG.conta(vend).whatsapp}?text=${encodeURIComponent(t)}`, "_blank", "noopener");
       pedir.disabled = false;
     }
   });

@@ -121,6 +121,8 @@
     if (clinica) url.searchParams.set("n", clinica);
     const fi = Object.keys(RU.FAIXAS).indexOf(faixa);
     if (fi >= 0) url.searchParams.set("f", String(fi));
+    const vend = RUApp.vendedor();
+    if (vend === "2") url.searchParams.set("v", "2");
 
     // A captura não foi gravada antes: tenta de novo com os dados guardados no aparelho.
     if (!leadId) {
@@ -143,6 +145,7 @@
         estimativa: r.estimativa !== null ? Math.round(r.estimativa) : null,
         respostas: RU.respostasTexto(respostas, Q[6].outro === respostas[6] ? outroTexto : ""),
         resultado: url.toString(),
+        v: vend,
       }),
     }).catch(() => {});
     await Promise.all([envio, new Promise((ok) => setTimeout(ok, 2000))]);

@@ -94,6 +94,10 @@
     else zap.value = d;
   });
 
+  // Responsável do link: sem ?v=2, volta a ser o link normal neste aparelho.
+  const vend = p.get("v") === "2" ? "2" : "1";
+  RUApp.gravarLocal("ru_v", vend);
+
   // Lead da prospecção abriu o link: registra a data no CRM (uma vez por dia neste aparelho).
   const codigoLink = (p.get("c") || "").trim();
   if (codigoLink) {
@@ -101,7 +105,7 @@
     const dia = new Date().toLocaleDateString("pt-BR");
     if (RUApp.lerLocal(chave) !== dia) {
       RUApp.gravarLocal(chave, dia);
-      fetch("/api/visita", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ codigo: codigoLink }), keepalive: true }).catch(() => {});
+      fetch("/api/visita", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ codigo: codigoLink, v: vend }), keepalive: true }).catch(() => {});
     }
   }
 
@@ -123,6 +127,7 @@
       consentimento: document.getElementById("lgpd").checked,
       codigo: p.get("c") || "",
       origem: origem(),
+      v: vend,
     };
     if (!dados.nome || !dados.clinica) return (erro.textContent = "Preencha seu nome e o nome da clínica.");
     if (dados.whatsapp.length < 10) return (erro.textContent = "Confira o WhatsApp, com DDD.");

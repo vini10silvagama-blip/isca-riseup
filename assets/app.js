@@ -16,11 +16,21 @@
     return lerLocal("ru_lead");
   }
 
+  // Responsável pelo link (1 = normal, 2 = link com ?v=2).
+  // A página de captura sempre regrava; as outras usam o link e, sem ele, o que ficou salvo.
+  function vendedor() {
+    const v = params.get("v");
+    if (v === "1" || v === "2") { gravarLocal("ru_v", v); return v; }
+    return lerLocal("ru_v") === "2" ? "2" : "1";
+  }
+
   function linkComLead(href) {
     const l = lead();
-    if (!l) return href;
+    const v = vendedor();
+    if (!l && v !== "2") return href;
     const u = new URL(href, location.href);
-    u.searchParams.set("l", l);
+    if (l) u.searchParams.set("l", l);
+    if (v === "2") u.searchParams.set("v", "2");
     return u.pathname + u.search + u.hash;
   }
 
@@ -73,5 +83,5 @@
   }
   if (document.body) carregamento(); else addEventListener("DOMContentLoaded", carregamento);
 
-  window.RUApp = { params, lead, linkComLead, ativarCopiar, revelar, baixarPlanilha, lerLocal, gravarLocal };
+  window.RUApp = { params, lead, vendedor, linkComLead, ativarCopiar, revelar, baixarPlanilha, lerLocal, gravarLocal };
 })();

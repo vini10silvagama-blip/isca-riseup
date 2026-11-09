@@ -1,25 +1,51 @@
-// Acesso à base "Prospecção - Rise Up" no Notion.
-// Variáveis de ambiente na Vercel: NOTION_TOKEN e NOTION_DATABASE_ID.
+// Acesso às bases de leads no Notion.
+// Conta 1 (link normal): NOTION_TOKEN, NOTION_DATABASE_ID e NOTION_AVISAR_USUARIO.
+// Conta 2 (link com ?v=2): NOTION_TOKEN_2, NOTION_DATABASE_ID_2 e NOTION_AVISAR_USUARIO_2.
+// Enquanto a conta 2 não estiver configurada, os leads do link 2 vão para a conta 1, marcados como "Link 2".
 
 const API = "https://api.notion.com/v1";
 const VERSAO = "2022-06-28";
 
-function cabecalhos() {
+const CONTAS = {
+  1: { token: () => process.env.NOTION_TOKEN, base: () => process.env.NOTION_DATABASE_ID, avisar: () => process.env.NOTION_AVISAR_USUARIO || "10cd74c4-690b-42e5-b20f-eadc4a102cef" },
+  2: { token: () => process.env.NOTION_TOKEN_2, base: () => process.env.NOTION_DATABASE_ID_2, avisar: () => process.env.NOTION_AVISAR_USUARIO_2 || "" },
+};
+
+// Conta do pedido atual. Cada função da API chama conta(b.v) e usa o que ela devolve.
+export function conta(v) {
+  const n = String(v || "") === "2" ? 2 : 1;
+  const c = CONTAS[n];
+  const pronta = Boolean(c.token() && c.base());
+  const usada = n === 2 && !pronta ? CONTAS[1] : c;
+  const marca = n === 2 && !pronta ? "[Link 2 · Felipe] " : "";
+  const token = usada.token();
+  const base = (usada.base() || "").replace(/-/g, "");
+  const chamar = (caminho, metodo, corpo) => notionCom(token, caminho, metodo, corpo);
   return {
-    Authorization: `Bearer ${process.env.NOTION_TOKEN}`,
+    numero: n,
+    marca,
+    notion: chamar,
+    baseId: () => base,
+    buscar: async (filtro) => {
+      const d = await chamar(`/databases/${base}/query`, "POST", { filter: filtro, page_size: 1 });
+      return d.results && d.results[0] ? d.results[0] : null;
+    },
+    avisar: (paginaId, mensagem) => avisarCom(chamar, usada.avisar(), paginaId, marca + mensagem),
+  };
+}
+
+function cabecalhos(token) {
+  return {
+    Authorization: `Bearer ${token}`,
     "Notion-Version": VERSAO,
     "Content-Type": "application/json",
   };
 }
 
-export function baseId() {
-  return (process.env.NOTION_DATABASE_ID || "").replace(/-/g, "");
-}
-
-export async function notion(caminho, metodo = "GET", corpo) {
+async function notionCom(token, caminho, metodo = "GET", corpo) {
   const r = await fetch(API + caminho, {
     method: metodo,
-    headers: cabecalhos(),
+    headers: cabecalhos(token),
     body: corpo ? JSON.stringify(corpo) : undefined,
   });
   const dados = await r.json().catch(() => ({}));
@@ -29,11 +55,6 @@ export async function notion(caminho, metodo = "GET", corpo) {
     throw erro;
   }
   return dados;
-}
-
-export async function buscar(filtro) {
-  const d = await notion(`/databases/${baseId()}/query`, "POST", { filter: filtro, page_size: 1 });
-  return d.results && d.results[0] ? d.results[0] : null;
 }
 
 // Data de hoje no fuso da Bahia, no formato AAAA-MM-DD.
@@ -46,21 +67,28 @@ export const titulo = (t) => ({ title: [{ text: { content: String(t).slice(0, 20
 export const selecao = (t) => ({ select: { name: t } });
 export const data = (d) => ({ date: { start: d } });
 
-// Aviso no Notion: um comentário na linha do lead mencionando o Vinicius,
-// o que dispara a notificação do Notion (app e e-mail, conforme as configurações dele).
-// Para trocar a pessoa avisada, defina NOTION_AVISAR_USUARIO na Vercel.
+// Aviso no Notion: um comentário na linha do lead mencionando a pessoa da conta,
+// o que dispara a notificação do Notion. Sem pessoa definida, o comentário sai sem menção.
 // Se o comentário falhar, a captura e o quiz seguem normalmente.
-const USUARIO_AVISADO = process.env.NOTION_AVISAR_USUARIO || "10cd74c4-690b-42e5-b20f-eadc4a102cef";
-
-export async function avisar(paginaId, mensagem) {
+// Sem pessoa definida na Vercel: se a conta do Notion tiver uma única pessoa, ela é avisada.
+// Precisa da permissão "Ler informações do usuário" na integração.
+async function pessoaUnica(chamar) {
   try {
-    await notion("/comments", "POST", {
-      parent: { page_id: paginaId },
-      rich_text: [
-        { type: "mention", mention: { user: { id: USUARIO_AVISADO } } },
-        { type: "text", text: { content: ` ${mensagem}`.slice(0, 1900) } },
-      ],
-    });
+    const d = await chamar("/users?page_size=100");
+    const pessoas = (d.results || []).filter((u) => u.type === "person");
+    return pessoas.length === 1 ? pessoas[0].id : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+async function avisarCom(chamar, usuario, paginaId, mensagem) {
+  try {
+    if (!usuario) usuario = await pessoaUnica(chamar);
+    const partes = [];
+    if (usuario) partes.push({ type: "mention", mention: { user: { id: usuario } } });
+    partes.push({ type: "text", text: { content: ` ${mensagem}`.slice(0, 1900) } });
+    await chamar("/comments", "POST", { parent: { page_id: paginaId }, rich_text: partes });
   } catch (e) {
     console.error("Aviso não enviado:", e.message);
   }

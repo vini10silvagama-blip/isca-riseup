@@ -1,13 +1,14 @@
 // Pedido do relatório completo, feito no botão do resultado.
 // Grava a data em "Pediu o relatório", guarda o link do relatório nas Observações,
-// deixa o lead na visão "Hoje" e avisa o Vinicius no Notion.
-import { notion, baseId, hoje, data, lerCorpo, somarObservacao, avisar } from "./_notion.js";
+// deixa o lead na visão "Hoje" e avisa o responsável no Notion.
+import { conta, hoje, data, lerCorpo, somarObservacao } from "./_notion.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ erro: "Método não permitido" });
   const b = lerCorpo(req);
 
   const lead = String(b.lead || "").replace(/-/g, "");
+  const { notion, baseId, avisar } = conta(b.v);
   if (!/^[0-9a-f]{32}$/i.test(lead)) return res.status(400).json({ erro: "Dados inválidos" });
 
   // Só aceita o link do relatório, sempre montado com o endereço deste site.

@@ -150,7 +150,7 @@ p { margin: 0; }
       <div><small>${r.modo === "top" ? "Nível das melhores" : "Chegando à média"}</small><b class="c">${temGanho ? `+R$ ${k(ganho)} mil/mês` : "Calcular na reunião"}</b></div>
       <div><small>Em um ano</small><b>${temGanho ? `+R$ ${k(ganho * 12)} mil` : "—"}</b></div>
     </div>
-    <div class="rodape" style="position:relative;margin-top:0"><span>Preparado por <b style="color:#fff;font-weight:500">Vinicius Gama · RiseUp Odonto</b></span><span>Sistema de captação, conversão e retenção</span></div>
+    <div class="rodape" style="position:relative;margin-top:0"><span>Preparado por <b style="color:#fff;font-weight:500">${esc(RU_CONFIG.conta(p.get("v")).nome)} · RiseUp Odonto</b></span><span>Sistema de captação, conversão e retenção</span></div>
   </section>`;
 
   const cardsEtapas = r.status.map((s, i) => `
@@ -209,7 +209,7 @@ p { margin: 0; }
       <span class="brilho" style="width:70mm;height:70mm;right:-22mm;top:-22mm;position:absolute"></span>
       <h3>Vamos aprofundar o diagnóstico da <span>${esc(clinica)}</span>?</h3>
       <p>Na reunião, analisamos com você cada etapa do atendimento da clínica, encontramos a causa de cada perda e, no final, apresentamos um caminho para corrigir.</p>
-      <a href="${esc(RU_CONFIG.agendaUrl(p.get("n") || "", nomeEtapa))}">Quero aprofundar meu diagnóstico</a>
+      <a href="${esc(RU_CONFIG.agendaUrl(p.get("n") || "", nomeEtapa, p.get("v")))}">Quero aprofundar meu diagnóstico</a>
     </div>
     ${rodape(4)}
   </section>`;

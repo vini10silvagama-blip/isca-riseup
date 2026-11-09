@@ -1,7 +1,7 @@
 // Recebe a página de captura e grava o lead no Notion.
 // Se o link tiver o código do lead (?c=RU-27) ou o WhatsApp já existir, atualiza a linha.
 // Caso contrário, cria uma linha nova.
-import { notion, buscar, baseId, hoje, texto, titulo, selecao, data, lerCorpo, etapaRespondeu, somarObservacao, avisar } from "./_notion.js";
+import { conta, hoje, texto, titulo, selecao, data, lerCorpo, etapaRespondeu, somarObservacao } from "./_notion.js";
 
 const FAIXAS = ["Até R$ 30 mil", "R$ 30 a 50 mil", "R$ 50 a 70 mil", "R$ 70 a 100 mil", "R$ 100 a 150 mil", "R$ 150 a 300 mil", "Acima de R$ 300 mil"];
 const ORIGENS = ["Prospecção", "Instagram", "Anúncio"];
@@ -22,6 +22,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ erro: "Dados incompletos" });
   }
   const whatsapp = `https://wa.me/${digitos}`;
+  const { notion, buscar, baseId, avisar, marca } = conta(b.v);
 
   try {
     let pagina = null;
@@ -40,13 +41,13 @@ export default async function handler(req, res) {
     if (pagina) {
       // Lead que já existe: o Decisor encontrado na prospecção não é trocado.
       // Quem preencheu fica registrado nas Observações.
-      const props = { ...comuns, "Observações": somarObservacao(pagina, `Captura ${hoje()}: preenchido por ${nome}.`) };
+      const props = { ...comuns, "Observações": somarObservacao(pagina, `${marca}Captura ${hoje()}: preenchido por ${nome}.`) };
       const etapa = etapaRespondeu(pagina);
       if (etapa) props.Etapa = etapa;
       if (!pagina.properties?.WhatsApp?.url) props.WhatsApp = { url: whatsapp };
       if (!pagina.properties?.Origem?.select) props.Origem = selecao(origem);
       await notion(`/pages/${pagina.id}`, "PATCH", { properties: props });
-      await avisar(pagina.id, `Nova captura: ${nome} (${clinica}) preencheu a página do guia. Enviar o PDF por WhatsApp ou e-mail: ${whatsapp} · ${email}`);
+      await avisar(pagina.id, `Nova captura: ${nome} (${clinica}) fez o cadastro. Se não fizer o diagnóstico hoje, chamar no WhatsApp ou e-mail: ${whatsapp} · ${email}`);
       return res.status(200).json({ lead: pagina.id });
     }
 
@@ -59,9 +60,10 @@ export default async function handler(req, res) {
         WhatsApp: { url: whatsapp },
         Origem: selecao(origem),
         Etapa: { status: { name: "Respondeu" } },
+        ...(marca ? { "Observações": texto(marca.trim()) } : {}),
       },
     });
-    await avisar(nova.id, `Lead novo pela captura (${origem}): ${nome} (${clinica}). Enviar o PDF por WhatsApp ou e-mail: ${whatsapp} · ${email}`);
+    await avisar(nova.id, `Lead novo pela captura (${origem}): ${nome} (${clinica}). Se não fizer o diagnóstico hoje, chamar no WhatsApp ou e-mail: ${whatsapp} · ${email}`);
     return res.status(200).json({ lead: nova.id });
   } catch (e) {
     console.error(e);
